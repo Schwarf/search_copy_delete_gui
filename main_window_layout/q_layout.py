@@ -1,11 +1,16 @@
 from PyQt5.QtWidgets import QVBoxLayout
-from PyQt5.QtGui import QColor
-class MainWindowQVLayout(QVBoxLayout)
+from typing import List
+
+from q_colors import Color
+
+class MainWindowQVLayout(QVBoxLayout):
     def __init__(self):
         super().__init__()
         self._layout = QVBoxLayout()
-        self._layout.addWidget(QColor())
+
+    def set_colors(self, colors: List[str]):
+        for color in colors:
+            self._layout.addWidget(Color(color))
 
     def get_layout(self):
-
-
+        return self._layout
