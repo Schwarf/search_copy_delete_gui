@@ -1,8 +1,7 @@
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5 import uic
-#from main_window_layout.q_main_window import MainWindow
-from untitled import Ui_MainWindow
+from main_window_layout.q_main_window import MainWindow
 #from main_window_layout.q_resizeable_widget import ResizableLabel
 from PyQt5 import QtWidgets
 import sys
@@ -29,8 +28,8 @@ if __name__ == '__main__':
     sys.exit(app.exec_())
 
 """
-app = QApplication(sys.argv)
-window = uic.loadUi('untitled.ui')
-window.show()
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    main_window = MainWindow()
 # Start the event loop.
-app.exec()
+    app.exec()
