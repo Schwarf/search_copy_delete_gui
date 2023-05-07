@@ -1,6 +1,6 @@
 from typing import Optional
 from PyQt5.QtCore import QSize, pyqtSlot, QThread, QRegExp, QThreadPool
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QLineEdit
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QLineEdit, QFormLayout, QVBoxLayout, QBoxLayout
 from PyQt5.QtGui import QRegExpValidator
 
 from q_layout import MainWindowQVLayout
@@ -17,8 +17,10 @@ class MainWindow(QMainWindow):
         self._width = 1920
         self._height = 1080
         self._worker_thread : Optional[QThread] = None
-        reg_ex = QRegExp("[A-Za-z0-9\-\_\*\/]+")
-        self._input_validator = QRegExpValidator(reg_ex)
+        start_path_regular_expression = QRegExp("[A-Za-z0-9\-\_\/]+")
+        sub_path_regular_expression = QRegExp("[A-Za-z0-9\-\_\*\/]+")
+        self._start_path_validator = QRegExpValidator(start_path_regular_expression)
+        self._sub_path_validator = QRegExpValidator(sub_path_regular_expression)
         self.init_ui()
         self._max_thread_count = QThreadPool.globalInstance().maxThreadCount()
         self._thread_pool = QThreadPool.globalInstance()
@@ -37,28 +39,33 @@ class MainWindow(QMainWindow):
 
     def init_ui(self):
         """Window Geometry"""
+        widget = QWidget()
         self.setWindowTitle(self._title)
         self.setGeometry(self._left, self._top, self._width, self._height)
         #label
         # Create textbox
-        self.path_input_text_box = QLineEdit(self)
-        self.path_input_text_box.move(20, 20)
-        self.path_input_text_box.resize(280, 40)
-        self.path_input_text_box.setValidator(self._input_validator)
-        # HERE we USE q_worker_thread
-        #self.path_input_text_box.textChanged.connect(self.start_worker_thread)
-        # HERE we USE q_runnable
-        self.path_input_text_box.textChanged.connect(self.run_task)
-        # Create a button in the window
-        self.button = QPushButton('Search', self)
-        self.button.move(20, 80)
-        #Print affected Rows
-        self.output_text_box = QLineEdit(self)
-        self.output_text_box.move(120, 120)
-        self.output_text_box.resize(880, 140)
-        self.output_text_box.setReadOnly(True)
-        # connect button to function on_click
-        self.button.clicked.connect(self.on_click)
+        self._start_path_input = QLineEdit(self)
+        self._start_path_input.move(20, 20)
+        self._start_path_input.resize(280, 40)
+        self._start_path_input.setValidator(self._start_path_validator)
+        self._start_path_input.textChanged.connect(self.run_task)
+
+        search_button = QPushButton('Search', self)
+        search_button.move(20, 80)
+        search_button.clicked.connect(self.on_click)
+
+        self._output_text_box = QLineEdit(self)
+        self._output_text_box.move(120, 120)
+        self._output_text_box.resize(880, 140)
+        self._output_text_box.setReadOnly(True)
+
+        layout = QFormLayout()
+        layout.addRow("Provide the default search path here.", self._start_path_input)
+        layout.addRow("Search button", search_button)
+        layout.addRow("Output", self._output_text_box)
+
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
         self.show()
 
     def run_task(self):
@@ -70,5 +77,5 @@ class MainWindow(QMainWindow):
     def on_click(self):
         """Button Action function"""
         default_value = "So far no files!"
-        self.output_text_box.setText(default_value)
-        print(self.path_input_text_box.text())
+        self._output_text_box.setText(default_value)
+        print(self._start_path_input.text())

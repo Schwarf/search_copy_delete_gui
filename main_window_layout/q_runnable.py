@@ -1,6 +1,6 @@
 import time
 import random
-
+from pathlib import Path
 from PyQt5.QtCore import QRunnable
 
 
@@ -9,10 +9,14 @@ class PathSearchRunnable(QRunnable):
         super().__init__()
         self._thread_id = thread_id
 
+    def list_paths(self):
+        print("List paths")
+
     def run(self):
-        for i in range(5):
-            print(f"Working on thread with id {self._thread_id}")
-            time.sleep(random.randint(700, 2500)/1000)
+        self.list_paths()
+        time.sleep(3.0)
+        print(f"Thread with id {self._thread_id} is finished")
+
 
 
 
