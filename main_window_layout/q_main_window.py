@@ -1,6 +1,7 @@
 from typing import Optional
 from PyQt5.QtCore import QSize, pyqtSlot, QThread, QRegExp, QThreadPool
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QLineEdit, QFormLayout, QVBoxLayout, QBoxLayout
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QLineEdit, QFormLayout, QVBoxLayout, QBoxLayout, \
+    QTextEdit
 from PyQt5.QtGui import QRegExpValidator
 
 from q_layout import MainWindowQVLayout
@@ -26,17 +27,6 @@ class MainWindow(QMainWindow):
         self._thread_pool = QThreadPool.globalInstance()
         self._thread_count: int = 0
 
-    def start_worker_thread(self, text):
-        if self._worker_thread is not None:
-            self._worker_thread.stop()
-            self._worker_thread.wait()
-        self._worker_thread = PathSearchThread(self)
-        self._worker_thread.finished.connect(self.worker_thread_finished)
-        self._worker_thread.start()
-
-    def worker_thread_finished(self):
-        self._worker_thread = None
-
     def init_ui(self):
         """Window Geometry"""
         widget = QWidget()
@@ -54,7 +44,7 @@ class MainWindow(QMainWindow):
         search_button.move(20, 80)
         search_button.clicked.connect(self.on_click)
 
-        self._output_text_box = QLineEdit(self)
+        self._output_text_box = QTextEdit(self)
         self._output_text_box.move(120, 120)
         self._output_text_box.resize(880, 140)
         self._output_text_box.setReadOnly(True)
@@ -76,6 +66,7 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def on_click(self):
         """Button Action function"""
-        default_value = "So far no files!"
+        default_value = "So far no files! \n Hallo1 \n Hallo2"
         self._output_text_box.setText(default_value)
+        self._output_text_box.append(self._start_path_input.text())
         print(self._start_path_input.text())
