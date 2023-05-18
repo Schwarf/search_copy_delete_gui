@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from PyQt5.QtCore import pyqtSlot, QThread, QRegExp, QThreadPool, QCoreApplication
+from PyQt5.QtCore import QThread, QRegExp, QThreadPool, QCoreApplication
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QLineEdit, QFormLayout, QTextEdit
 
@@ -38,8 +38,9 @@ class MainWindow(QMainWindow):
 
     def _exit_button_clicked(self):
         QCoreApplication.instance().quit()
-    def _exit_button(self) ->QPushButton:
-        exit_button =  QPushButton('Exit', self)
+
+    def _exit_button(self) -> QPushButton:
+        exit_button = QPushButton('Exit', self)
         exit_button.move(20, 80)
         exit_button.clicked.connect(self._exit_button_clicked)
         return exit_button
@@ -88,8 +89,6 @@ class MainWindow(QMainWindow):
 
     def _on_search_button_clicked(self, search_results: List) -> None:
         """Button Action function"""
-        default_value = "So far no files! \n Hallo1 \n Hallo2"
-        self._output_text_box.setText(default_value)
+        self._output_text_box.clear()
         for result in search_results:
             self._output_text_box.append(str(result))
-
