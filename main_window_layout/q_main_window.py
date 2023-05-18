@@ -1,6 +1,6 @@
 from typing import Optional
 
-from PyQt5.QtCore import pyqtSlot, QThread, QRegExp, QThreadPool
+from PyQt5.QtCore import pyqtSlot, QThread, QRegExp, QThreadPool, QCoreApplication
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QLineEdit, QFormLayout, QTextEdit
 
@@ -36,16 +36,24 @@ class MainWindow(QMainWindow):
         start_path_input.textChanged.connect(self.run_task)
         return start_path_input
 
+    def _exit_button_clicked(self):
+        QCoreApplication.instance().quit()
+    def _exit_button(self) ->QPushButton:
+        exit_button =  QPushButton('Exit', self)
+        exit_button.move(20, 80)
+        exit_button.clicked.connect(self._exit_button_clicked)
+        return exit_button
+
     def _search_button(self) -> QPushButton:
         search_button = QPushButton('Search', self)
         search_button.move(20, 80)
-        search_button.clicked.connect(self.on_click)
+        search_button.clicked.connect(self._on_search_button_clicked)
         return search_button
 
     def _output_text_box(self) -> QTextEdit:
         output_text_box = QTextEdit(self)
         output_text_box.move(120, 120)
-        output_text_box.resize(880, 140)
+        output_text_box.resize(450, 140)
         output_text_box.setReadOnly(True)
         return output_text_box
 
@@ -58,6 +66,7 @@ class MainWindow(QMainWindow):
         # Create textbox
         self._start_path_input = self._start_path_input()
         search_button = self._search_button()
+        exit_button = self._exit_button()
         self._output_text_box = self._output_text_box()
 
         layout = QFormLayout()
@@ -65,7 +74,7 @@ class MainWindow(QMainWindow):
 
         layout.addRow("Search button", search_button)
         layout.addRow("Output", self._output_text_box)
-
+        layout.addRow("Exit button", exit_button)
         widget.setLayout(layout)
         self.setCentralWidget(widget)
         self.show()
@@ -77,7 +86,7 @@ class MainWindow(QMainWindow):
             self._thread_pool.start(runnable)
 
     @pyqtSlot()
-    def on_click(self):
+    def _on_search_button_clicked(self):
         """Button Action function"""
         default_value = "So far no files! \n Hallo1 \n Hallo2"
         self._output_text_box.setText(default_value)
