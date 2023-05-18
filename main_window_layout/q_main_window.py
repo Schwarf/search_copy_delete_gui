@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from PyQt5.QtCore import pyqtSlot, QThread, QRegExp, QThreadPool, QCoreApplication
 from PyQt5.QtGui import QRegExpValidator
@@ -82,13 +82,14 @@ class MainWindow(QMainWindow):
     def run_task(self):
         if self._thread_count < self._max_thread_count:
             self._thread_count += 1
-            runnable = PathSearchRunnable(self._thread_count)
-            self._thread_pool.start(runnable)
+            self._runnable = PathSearchRunnable(self._thread_count)
+            self._runnable.signal_search_finished.search_result_ready.connect(self._on_search_button_clicked)
+            self._thread_pool.start(self._runnable)
 
-    @pyqtSlot()
-    def _on_search_button_clicked(self):
+    def _on_search_button_clicked(self, search_results: List) -> None:
         """Button Action function"""
         default_value = "So far no files! \n Hallo1 \n Hallo2"
         self._output_text_box.setText(default_value)
-        self._output_text_box.append(self._start_path_input.text())
-        print(self._start_path_input.text())
+        for result in search_results:
+            self._output_text_box.append(str(result))
+
