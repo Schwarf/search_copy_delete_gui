@@ -83,7 +83,7 @@ class MainWindow(QMainWindow):
     def run_task(self):
         if self._thread_count < self._max_thread_count:
             self._thread_count += 1
-            self._runnable = PathSearchRunnable(self._thread_count)
+            self._runnable = PathSearchRunnable(self._thread_count, self._start_path_input.text())
             self._runnable.signal_search_finished.search_result_ready.connect(self._on_search_button_clicked)
             self._thread_pool.start(self._runnable)
 
