@@ -58,6 +58,6 @@ class PathSearchRunnable(QRunnable):
         self._thread_counter.increment()
         search_list = self.list_directory_paths()
         if not search_list:
-            self.signal_search_finished.search_result_ready.emit(["Path is not valid!"])
+            self.signal_search_finished.search_result_ready.emit([])
         self.signal_search_finished.search_result_ready.emit(search_list)
         self._thread_counter.decrement()

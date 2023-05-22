@@ -1,9 +1,10 @@
 from typing import Optional, List
 
 from PyQt5.QtCore import QThread, QRegExp, QThreadPool, QCoreApplication
-from PyQt5.QtGui import QRegExpValidator
+from PyQt5.QtGui import QRegExpValidator, QColor
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QLineEdit, QFormLayout, QTextEdit
 
+from q_misc import append_text_in_color
 from q_runnable import PathSearchRunnable, ThreadCounter
 
 
@@ -18,7 +19,6 @@ class MainWindow(QMainWindow):
         self._top = 10
         self._width = 1920
         self._height = 1080
-        self._worker_thread: Optional[QThread] = None
         start_path_regular_expression = QRegExp("[A-Za-z0-9\-\_\/]+")
         sub_path_regular_expression = QRegExp("[A-Za-z0-9\-\_\*\/]+")
         self._start_path_validator = QRegExpValidator(start_path_regular_expression)
@@ -26,9 +26,8 @@ class MainWindow(QMainWindow):
         self.init_ui()
         self._max_thread_count = QThreadPool.globalInstance().maxThreadCount()
         self._thread_counter = ThreadCounter()
-        #self._thread_counter.thread_count_changed.connect(lambda count: print("Thread count is: ", count))
+        # self._thread_counter.thread_count_changed.connect(lambda count: print("Thread count is: ", count))
         self._thread_pool = QThreadPool.globalInstance()
-        self._thread_count: int = 0
 
     def _start_path_input(self) -> QLineEdit:
         start_path_input = QLineEdit(self)
@@ -97,6 +96,11 @@ class MainWindow(QMainWindow):
 
     def _on_search_button_clicked(self, search_results: List) -> None:
         """Button Action function"""
+        if len(search_results) == 0:
+            color = 'red'
+            text = 'The path is invalid!'
+            append_text_in_color(self._output_text_box, text, color)
+            return
         self._output_text_box.clear()
         for result in search_results:
             self._output_text_box.append(str(result))
