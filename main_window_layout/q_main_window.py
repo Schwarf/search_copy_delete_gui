@@ -4,7 +4,7 @@ from PyQt5.QtCore import QThread, QRegExp, QThreadPool, QCoreApplication
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QLineEdit, QFormLayout, QTextEdit
 
-from q_runnable import PathSearchRunnable
+from q_runnable import PathSearchRunnable, ThreadCounter
 
 
 # Subclass QMainWindow to customize your application's main window
@@ -25,6 +25,8 @@ class MainWindow(QMainWindow):
         self._sub_path_validator = QRegExpValidator(sub_path_regular_expression)
         self.init_ui()
         self._max_thread_count = QThreadPool.globalInstance().maxThreadCount()
+        self._thread_counter = ThreadCounter()
+        self._thread_counter.thread_count_changed.connect(lambda count: print("Thread count is: ", count))
         self._thread_pool = QThreadPool.globalInstance()
         self._thread_count: int = 0
 
@@ -81,9 +83,8 @@ class MainWindow(QMainWindow):
         self.show()
 
     def run_task(self):
-        if self._thread_count < self._max_thread_count:
-            self._thread_count += 1
-            self._runnable = PathSearchRunnable(self._thread_count, self._start_path_input.text())
+        if self._thread_counter.count < self._max_thread_count:
+            self._runnable = PathSearchRunnable(self._thread_counter, self._start_path_input.text())
             self._runnable.signal_search_finished.search_result_ready.connect(self._on_search_button_clicked)
             self._thread_pool.start(self._runnable)
 
