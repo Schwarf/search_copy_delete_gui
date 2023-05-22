@@ -26,7 +26,7 @@ class MainWindow(QMainWindow):
         self.init_ui()
         self._max_thread_count = QThreadPool.globalInstance().maxThreadCount()
         self._thread_counter = ThreadCounter()
-        # self._thread_counter.thread_count_changed.connect(lambda count: print("Thread count is: ", count))
+        self._thread_counter.thread_count_changed.connect(lambda count: print("Thread count is: ", count))
         self._thread_pool = QThreadPool.globalInstance()
 
     def _start_path_input(self) -> QLineEdit:
@@ -45,12 +45,6 @@ class MainWindow(QMainWindow):
         exit_button.move(20, 80)
         exit_button.clicked.connect(self._exit_button_clicked)
         return exit_button
-
-    def _search_button(self) -> QPushButton:
-        search_button = QPushButton('Search', self)
-        search_button.move(20, 80)
-        search_button.clicked.connect(self._on_search_button_clicked)
-        return search_button
 
     def _output_text_box(self) -> QTextEdit:
         output_text_box = QTextEdit(self)
@@ -73,7 +67,6 @@ class MainWindow(QMainWindow):
         # label
         # Create textbox
         self._start_path_input = self._start_path_input()
-        search_button = self._search_button()
         exit_button = self._exit_button()
         self._output_text_box = self._output_text_box()
         self._file_pattern_text_box = self._file_pattern_text_box()
@@ -81,7 +74,6 @@ class MainWindow(QMainWindow):
         layout = QFormLayout()
         layout.addRow("Provide the default search path here.", self._start_path_input)
         layout.addRow("File pattern", self._file_pattern_text_box)
-        layout.addRow("Search button", search_button)
         layout.addRow("Output", self._output_text_box)
         layout.addRow("Exit button", exit_button)
         widget.setLayout(layout)
@@ -96,11 +88,10 @@ class MainWindow(QMainWindow):
 
     def _on_search_button_clicked(self, search_results: List) -> None:
         """Button Action function"""
+        color = 'black'
         if len(search_results) == 0:
             color = 'red'
-            text = 'The path is invalid!'
-            append_text_in_color(self._output_text_box, text, color)
-            return
+            search_results = ['Invalid path!!!']
         self._output_text_box.clear()
         for result in search_results:
-            self._output_text_box.append(str(result))
+            append_text_in_color(self._output_text_box, result, color)
