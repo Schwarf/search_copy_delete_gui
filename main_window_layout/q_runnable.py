@@ -10,23 +10,26 @@ class SignalSearchFinished(QObject):
 
 class ThreadCounter(QObject):
     thread_count_changed = pyqtSignal(int)
-    def __init__(self):
+
+    def __init__(self) -> None:
         super().__init__()
         self._count = 0
         self.mutex = QMutex()
 
     @property
-    def count(self):
+    def count(self) -> int:
         return self._count
-    def increment(self):
+
+    def increment(self) -> None:
         mutex_locker = QMutexLocker(self.mutex)
         self._count += 1
         self.thread_count_changed.emit(self._count)
 
-    def decrement(self):
+    def decrement(self) -> None:
         mutex_locker = QMutexLocker(self.mutex)
         self._count -= 1
         self.thread_count_changed.emit(self._count)
+
 
 class PathSearchRunnable(QRunnable):
     def __init__(self, thread_counter: ThreadCounter, path: str = None) -> None:
@@ -40,20 +43,20 @@ class PathSearchRunnable(QRunnable):
         self.signal_search_finished = SignalSearchFinished()
 
     @property
-    def is_running(self):
+    def is_running(self) -> bool:
         return self._is_running
 
-    def list_paths(self):
+    def list_directory_paths(self) -> List[pathlib.Path]:
         self._is_running = False
+        path_list = []
         if not self._path.exists():
-            return []
-        path_list = [path for path in self._path.iterdir()]
-
+            return path_list
+        path_list = [path for path in self._path.iterdir() if path.is_dir()]
         return path_list
 
-    def run(self):
+    def run(self) -> None:
         self._thread_counter.increment()
-        search_list = self.list_paths()
+        search_list = self.list_directory_paths()
         if not search_list:
             self.signal_search_finished.search_result_ready.emit(["Path is not valid!"])
         self.signal_search_finished.search_result_ready.emit(search_list)

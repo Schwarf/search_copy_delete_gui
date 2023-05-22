@@ -26,7 +26,7 @@ class MainWindow(QMainWindow):
         self.init_ui()
         self._max_thread_count = QThreadPool.globalInstance().maxThreadCount()
         self._thread_counter = ThreadCounter()
-        self._thread_counter.thread_count_changed.connect(lambda count: print("Thread count is: ", count))
+        #self._thread_counter.thread_count_changed.connect(lambda count: print("Thread count is: ", count))
         self._thread_pool = QThreadPool.globalInstance()
         self._thread_count: int = 0
 
@@ -60,6 +60,12 @@ class MainWindow(QMainWindow):
         output_text_box.setReadOnly(True)
         return output_text_box
 
+    def _file_pattern_text_box(self) -> QLineEdit:
+        file_pattern_text_box = QLineEdit(self)
+        file_pattern_text_box.setValidator(self._sub_path_validator)
+        file_pattern_text_box.textChanged.connect(self.run_task)
+        return file_pattern_text_box
+
     def init_ui(self):
         """Window Geometry"""
         widget = QWidget()
@@ -71,10 +77,11 @@ class MainWindow(QMainWindow):
         search_button = self._search_button()
         exit_button = self._exit_button()
         self._output_text_box = self._output_text_box()
+        self._file_pattern_text_box = self._file_pattern_text_box()
 
         layout = QFormLayout()
         layout.addRow("Provide the default search path here.", self._start_path_input)
-
+        layout.addRow("File pattern", self._file_pattern_text_box)
         layout.addRow("Search button", search_button)
         layout.addRow("Output", self._output_text_box)
         layout.addRow("Exit button", exit_button)
