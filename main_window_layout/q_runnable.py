@@ -50,6 +50,8 @@ class PathSearchRunnable(QRunnable):
     def _perform_search(self, path_generator: Generator[pathlib.Path, None, None],
                         filter_function: Callable[[pathlib.Path], bool]) -> List[pathlib.Path]:
         path_list = []
+        if not self._path.exists():
+            return path_list
         counter = 0
         while self._is_running and counter < self._maximum_items:
             try:
