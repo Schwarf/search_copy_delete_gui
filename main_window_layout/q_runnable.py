@@ -72,49 +72,17 @@ class PathSearchRunnable(QRunnable):
     def _is_directory(self, path: pathlib.Path) -> bool:
         return path.is_dir()
 
-    def list_directory_paths(self) -> List[pathlib.Path]:
-        path_list = []
-        if not self._path.exists():
-            return path_list
-        if self.ignore_hidden_files:
-            path_list = [path for path in itertools.islice(self._path.iterdir(), self._maximum_items) if
-                         path.is_dir() and not path.name.startswith(".")]
-        else:
-            path_list = [path for path in itertools.islice(self._path.iterdir(), self._maximum_items) if
-                         path.is_dir()]
-        return path_list
-
-    def list_file_paths(self) -> List[pathlib.Path]:
-        file_path_list = []
-        if not self._path.exists():
-            return file_path_list
-        if self.ignore_hidden_files:
-            file_path_list = [path for path in
-                              itertools.islice(self._path.rglob(self._file_pattern), self._maximum_items) if
-                              path.is_file() and not path.name.startswith(".")]
-        else:
-            file_path_list = [path for path in
-                              itertools.islice(self._path.rglob(self._file_pattern), self._maximum_items) if
-                              path.is_file()]
-        return file_path_list
-
-    def folder_generator(self, directory: pathlib.Path):
-        return directory.iterdir()
-
-    def file_generator(self, file: pathlib.Path, pattern: str):
-        return file.rglob(pattern)
-
     def run(self) -> None:
         self._thread_counter.increment()
-        generator = self.folder_generator(self._path)
+        path_generator = self._path.iterdir()
         filter_function = self._is_directory
         if self._file_pattern:
-            generator = self.file_generator(self._path, self._file_pattern)
+            path_generator = self._path.rglob(self._file_pattern)
             filter_function = self._is_file
 
         if self.ignore_hidden_files:
             filter_function = filter_function and self._ignore_hidden_files
 
-        search_list = self._perform_search(generator, filter_function)
+        search_list = self._perform_search(path_generator, filter_function)
         self.signal_search_finished.search_result_ready.emit(search_list)
         self._thread_counter.decrement()
