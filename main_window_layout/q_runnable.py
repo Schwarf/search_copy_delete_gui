@@ -1,12 +1,31 @@
-import itertools
 import pathlib
 from typing import List, Generator, Callable
 
-from PyQt5.QtCore import QRunnable, QObject, pyqtSignal, QMutex, QMutexLocker
+from PyQt5.QtCore import QRunnable, QObject, pyqtSignal, QMutex, QMutexLocker, QThreadPool
 
 
 class SignalSearchFinished(QObject):
     search_result_ready = pyqtSignal(list)
+
+
+class ThreadManager(QObject):
+    def __init__(self) -> None:
+        super().__init__()
+        self._max_thread_count = QThreadPool.globalInstance().maxThreadCount() / 2
+        self._thread_pool = QThreadPool.globalInstance()
+        self._thread_counter = ThreadCounter()
+
+    def start_runnable(self, runnable: QRunnable = None):
+        if not runnable:
+            raise ValueError("Runnable is None")
+
+        self._thread_pool.start(runnable)
+
+    def stop_all_runnables(self):
+        for runnable in self.threadpool.leasedThreads():
+            if isinstance(runnable, MyRunnable):
+                runnable.stop()
+        self._thread_pool.waitForDone()
 
 
 class ThreadCounter(QObject):
@@ -32,7 +51,12 @@ class ThreadCounter(QObject):
         self.thread_count_changed.emit(self._count)
 
 
-class PathSearchRunnable(QRunnable):
+class MyRunnable(QRunnable):
+    def stop(self):
+        pass
+
+
+class PathSearchRunnable(MyRunnable):
     def __init__(self, thread_counter: ThreadCounter, path: str = None, pattern: str = None,
                  ignore_hidden_files: bool = True) -> None:
         super().__init__()
@@ -86,3 +110,6 @@ class PathSearchRunnable(QRunnable):
         search_list = self._perform_search(path_generator, filter_function)
         self.signal_search_finished.search_result_ready.emit(search_list)
         self._thread_counter.decrement()
+
+    def stop(self):
+        self._is_running = False
