@@ -1,3 +1,4 @@
+import itertools
 import pathlib
 from typing import List
 
@@ -31,30 +32,42 @@ class ThreadCounter(QObject):
         self.thread_count_changed.emit(self._count)
 
 
-
 class PathSearchRunnable(QRunnable):
-    def __init__(self, thread_counter: ThreadCounter, path: str = None, pattern: str = None) -> None:
+    def __init__(self, thread_counter: ThreadCounter, path: str = None, pattern: str = None,
+                 ignore_hidden_files: bool = True) -> None:
         super().__init__()
         self._thread_counter = thread_counter
+        self._ignore_hidden_files = ignore_hidden_files
         if path is None:
             self._path = pathlib.Path.home()
         else:
             self._path = pathlib.Path(path)
         self._pattern = pattern
         self.signal_search_finished = SignalSearchFinished()
+        self._maximum_items = 5000
 
     def list_directory_paths(self) -> List[pathlib.Path]:
         path_list = []
         if not self._path.exists():
             return path_list
-        path_list = [path for path in self._path.iterdir() if path.is_dir()]
+        if self._ignore_hidden_files:
+            path_list = [path for path in itertools.islice(self._path.iterdir(), self._maximum_items) if
+                         path.is_dir() and not path.name.startswith(".")]
+        else:
+            path_list = [path for path in itertools.islice(self._path.iterdir(), self._maximum_items) if
+                         path.is_dir()]
         return path_list
 
     def list_file_paths(self) -> List[pathlib.Path]:
         file_path_list = []
         if not self._path.exists():
             return file_path_list
-        file_path_list = [path for path in  self._path.rglob(self._pattern)]
+        if self._ignore_hidden_files:
+            file_path_list = [path for path in itertools.islice(self._path.rglob(self._pattern), self._maximum_items) if
+                          path.is_file() and not path.name.startswith(".")]
+        else:
+            file_path_list = [path for path in itertools.islice(self._path.rglob(self._pattern), self._maximum_items) if
+                              path.is_file()]
         return file_path_list
 
     def run(self) -> None:

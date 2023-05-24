@@ -2,7 +2,7 @@ from typing import List
 
 from PyQt5.QtCore import QRegExp, QThreadPool, QCoreApplication
 from PyQt5.QtGui import QRegExpValidator
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QLineEdit, QFormLayout, QTextEdit, QHBoxLayout, QLabel
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QLineEdit, QFormLayout, QTextEdit, QCheckBox
 
 from q_misc import append_text_in_color
 from q_runnable import PathSearchRunnable, ThreadCounter
@@ -52,9 +52,15 @@ class MainWindow(QMainWindow):
         return file_pattern_text_box
 
     def setup_search_button(self) -> QPushButton:
-        search_button = QPushButton("Search file pattern")
+        search_button = QPushButton("Search file pattern", self)
         search_button.clicked.connect(self.run_search)
         return search_button
+
+    def setup_ignore_hidden_files_check_box(self) -> QCheckBox:
+        ignore_hidden_files = QCheckBox("Ignore hidden folders and files.", self)
+        ignore_hidden_files.setCheckState(2)
+        ignore_hidden_files.clicked.connect(self.run_search)
+        return ignore_hidden_files
 
     def init_ui(self):
         """Window Geometry"""
@@ -66,15 +72,15 @@ class MainWindow(QMainWindow):
         self._search_path_input = self.setup_search_path_input()
         self._search_output = self.setup_search_output()
         self._file_pattern_input = self.setup_file_pattern_input()
-
+        self._ignore_hidden_files_check_box = self.setup_ignore_hidden_files_check_box()
         exit_button = self.setup_exit_button()
         self._search_button = self.setup_search_button()
-
 
         outer_layout = QFormLayout()
         outer_layout.addRow("Provide the default search path here.", self._search_path_input)
         outer_layout.addRow(self._search_button, self._file_pattern_input)
-        outer_layout.addRow("Folders found in given path", self._search_output)
+        outer_layout.addRow("", self._ignore_hidden_files_check_box)
+        outer_layout.addRow("Folders/files found in given path (max. 5000)", self._search_output)
         outer_layout.addRow("Exit button", exit_button)
         widget.setLayout(outer_layout)
         self.setCentralWidget(widget)
@@ -88,6 +94,9 @@ class MainWindow(QMainWindow):
                                                     self._file_pattern_input.text())
             elif sender == self._search_path_input:
                 self._runnable = PathSearchRunnable(self._thread_counter, self._search_path_input.text())
+            elif sender == self._ignore_hidden_files_check_box:
+                self._runnable = PathSearchRunnable(self._thread_counter, self._search_path_input.text(),
+                                                    ignore_hidden_files=self._ignore_hidden_files_check_box.checkState() == 2)
             self._runnable.signal_search_finished.search_result_ready.connect(self._on_search_button_clicked)
             self._thread_pool.start(self._runnable)
 
