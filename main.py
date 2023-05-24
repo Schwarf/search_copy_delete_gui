@@ -1,8 +1,7 @@
 
 from PyQt5.QtWidgets import QApplication
-from PyQt5 import uic
 from main_window_layout.q_main_window import MainWindow
-#from main_window_layout.q_resizeable_widget import ResizableLabel
+
 from PyQt5 import QtWidgets
 import sys
 """
