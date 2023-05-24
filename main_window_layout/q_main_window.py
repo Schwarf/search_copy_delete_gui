@@ -107,3 +107,6 @@ class MainWindow(QMainWindow):
             self._search_output.clear()
         for result in search_results:
             append_text_in_color(self._search_output, result, color)
+
+    def on_exit(self):
+        self._thread_manager.stop_all_runnables()
