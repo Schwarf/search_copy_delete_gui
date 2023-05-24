@@ -8,26 +8,6 @@ class SignalSearchFinished(QObject):
     search_result_ready = pyqtSignal(list)
 
 
-class ThreadManager(QObject):
-    def __init__(self) -> None:
-        super().__init__()
-        self._max_thread_count = QThreadPool.globalInstance().maxThreadCount() / 2
-        self._thread_pool = QThreadPool.globalInstance()
-        self._thread_counter = ThreadCounter()
-
-    def start_runnable(self, runnable: QRunnable = None):
-        if not runnable:
-            raise ValueError("Runnable is None")
-
-        self._thread_pool.start(runnable)
-
-    def stop_all_runnables(self):
-        for runnable in self.threadpool.leasedThreads():
-            if isinstance(runnable, MyRunnable):
-                runnable.stop()
-        self._thread_pool.waitForDone()
-
-
 class ThreadCounter(QObject):
     thread_count_changed = pyqtSignal(int)
 
@@ -52,15 +32,41 @@ class ThreadCounter(QObject):
 
 
 class MyRunnable(QRunnable):
-    def stop(self):
+    def stop(self) -> None:
+        pass
+
+    def set_thread_counter(self, thread_counter: ThreadCounter) -> None:
         pass
 
 
+class ThreadManager(QObject):
+    def __init__(self) -> None:
+        super().__init__()
+        self._max_thread_count = QThreadPool.globalInstance().maxThreadCount() / 2
+        self._thread_pool = QThreadPool.globalInstance()
+        self._thread_counter = ThreadCounter()
+        self._thread_counter.thread_count_changed.connect(lambda count: print("Thread count is: ", count))
+
+    def start_runnable(self, runnable: MyRunnable = None) -> None:
+        if not runnable:
+            raise ValueError("Runnable is None")
+        runnable.set_thread_counter(self._thread_counter)
+        if self._thread_counter.count < self._max_thread_count:
+            self._thread_pool.start(runnable)
+
+    def stop_all_runnables(self) -> None:
+        for runnable in self.threadpool.leasedThreads():
+            if isinstance(runnable, MyRunnable):
+                runnable.stop()
+        self._thread_pool.waitForDone()
+
+
 class PathSearchRunnable(MyRunnable):
-    def __init__(self, thread_counter: ThreadCounter, path: str = None, pattern: str = None,
+    def __init__(self, path: str = None, pattern: str = None,
                  ignore_hidden_files: bool = True) -> None:
         super().__init__()
-        self._thread_counter = thread_counter
+        self._thread_counter: ThreadCounter = None
+
         self.ignore_hidden_files = ignore_hidden_files
         if path is None:
             self._path = pathlib.Path.home()
@@ -111,5 +117,8 @@ class PathSearchRunnable(MyRunnable):
         self.signal_search_finished.search_result_ready.emit(search_list)
         self._thread_counter.decrement()
 
-    def stop(self):
+    def stop(self) -> None:
         self._is_running = False
+
+    def set_thread_counter(self, thread_counter: ThreadCounter) -> None:
+        self._thread_counter = thread_counter

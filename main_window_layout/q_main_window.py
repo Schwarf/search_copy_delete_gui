@@ -1,11 +1,11 @@
 from typing import List
 
-from PyQt5.QtCore import QRegExp, QThreadPool, QCoreApplication
+from PyQt5.QtCore import QRegExp, QCoreApplication
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QLineEdit, QFormLayout, QTextEdit, QCheckBox
 
 from q_misc import append_text_in_color
-from q_runnable import PathSearchRunnable, ThreadCounter
+from q_runnable import PathSearchRunnable, ThreadManager
 
 
 # Subclass QMainWindow to customize your application's main window
@@ -24,11 +24,8 @@ class MainWindow(QMainWindow):
         self._start_path_validator = QRegExpValidator(start_path_regular_expression)
         self._sub_path_validator = QRegExpValidator(sub_path_regular_expression)
         self.init_ui()
+        self._thread_manager = ThreadManager()
         # We only use maximum up to half the threads of the system
-        self._max_thread_count = QThreadPool.globalInstance().maxThreadCount() / 2
-        self._thread_counter = ThreadCounter()
-        self._thread_counter.thread_count_changed.connect(lambda count: print("Thread count is: ", count))
-        self._thread_pool = QThreadPool.globalInstance()
 
     def setup_search_path_input(self) -> QLineEdit:
         default_path = QLineEdit(self)
@@ -89,17 +86,16 @@ class MainWindow(QMainWindow):
 
     def run_search(self):
         sender = self.sender()
-        if self._thread_counter.count < self._max_thread_count:
-            if sender == self._search_button:
-                self._runnable = PathSearchRunnable(self._thread_counter, self._search_path_input.text(),
-                                                    self._file_pattern_input.text())
-            elif sender == self._search_path_input:
-                self._runnable = PathSearchRunnable(self._thread_counter, self._search_path_input.text())
-            elif sender == self._ignore_hidden_files_check_box:
-                self._runnable = PathSearchRunnable(self._thread_counter, self._search_path_input.text(),
-                                                    ignore_hidden_files=self._ignore_hidden_files_check_box.checkState() == 2)
-            self._runnable.signal_search_finished.search_result_ready.connect(self._on_search_button_clicked)
-            self._thread_pool.start(self._runnable)
+        if sender == self._search_button:
+            runnable = PathSearchRunnable(self._search_path_input.text(), self._file_pattern_input.text())
+        elif sender == self._search_path_input:
+            runnable = PathSearchRunnable(self._search_path_input.text())
+        elif sender == self._ignore_hidden_files_check_box:
+            runnable = PathSearchRunnable(self._search_path_input.text(),
+                                                ignore_hidden_files=self._ignore_hidden_files_check_box.checkState() == 2)
+        runnable.signal_search_finished.search_result_ready.connect(self._on_search_button_clicked)
+        self._thread_manager.start_runnable(runnable)
+
 
     def _on_search_button_clicked(self, search_results: List) -> None:
         """Button Action function"""
