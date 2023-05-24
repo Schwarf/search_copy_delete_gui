@@ -116,7 +116,5 @@ class PathSearchRunnable(QRunnable):
             filter_function = filter_function and self._ignore_hidden_files
 
         search_list = self._perform_search(generator, filter_function)
-        if not search_list:
-            self.signal_search_finished.search_result_ready.emit([])
         self.signal_search_finished.search_result_ready.emit(search_list)
         self._thread_counter.decrement()
