@@ -50,9 +50,19 @@ class PathSearchRunnable(QRunnable):
         path_list = [path for path in self._path.iterdir() if path.is_dir()]
         return path_list
 
+    def list_file_paths(self) -> List[pathlib.Path]:
+        file_path_list = []
+        if not self._path.exists():
+            return file_path_list
+        file_path_list = [path for path in  self._path.rglob(self._pattern)]
+        return file_path_list
+
     def run(self) -> None:
         self._thread_counter.increment()
-        search_list = self.list_directory_paths()
+        if self._pattern is None:
+            search_list = self.list_directory_paths()
+        else:
+            search_list = self.list_file_paths()
         if not search_list:
             self.signal_search_finished.search_result_ready.emit([])
         self.signal_search_finished.search_result_ready.emit(search_list)

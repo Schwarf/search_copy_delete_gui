@@ -2,7 +2,8 @@ from typing import Optional, List
 
 from PyQt5.QtCore import QThread, QRegExp, QThreadPool, QCoreApplication
 from PyQt5.QtGui import QRegExpValidator, QColor
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QLineEdit, QFormLayout, QTextEdit
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QLineEdit, QFormLayout, QTextEdit, QVBoxLayout, \
+    QDialogButtonBox, QHBoxLayout, QLabel
 
 from q_misc import append_text_in_color
 from q_runnable import PathSearchRunnable, ThreadCounter
@@ -32,7 +33,7 @@ class MainWindow(QMainWindow):
     def _default_path(self) -> QLineEdit:
         start_path_input = QLineEdit(self)
         start_path_input.setValidator(self._start_path_validator)
-        start_path_input.textChanged.connect(self.run_directory_search)
+        start_path_input.textChanged.connect(self.run_search)
         return start_path_input
 
     def _exit_button_clicked(self):
@@ -52,7 +53,7 @@ class MainWindow(QMainWindow):
     def _file_pattern_text_box(self) -> QLineEdit:
         file_pattern_text_box = QLineEdit(self)
         file_pattern_text_box.setValidator(self._sub_path_validator)
-        file_pattern_text_box.textChanged.connect(self.run_directory_search)
+        file_pattern_text_box.textChanged.connect(self.run_search)
         return file_pattern_text_box
 
     def init_ui(self):
@@ -67,18 +68,30 @@ class MainWindow(QMainWindow):
         self._found_folders = self._found_folders()
         self._file_pattern_text_box = self._file_pattern_text_box()
 
-        layout = QFormLayout()
-        layout.addRow("Provide the default search path here.", self._default_path)
-        layout.addRow("File pattern", self._file_pattern_text_box)
-        layout.addRow("Folders found in given path", self._found_folders)
-        layout.addRow("Exit button", exit_button)
-        widget.setLayout(layout)
+        search_button = QPushButton("Search file pattern")
+        search_button.clicked.connect(self.run_search)
+        file_pattern_label = QLabel("Provide file pattern:")
+        self._file_pattern_line_edit = QLineEdit()
+        file_pattern_widget = QWidget()
+        file_pattern_layout = QHBoxLayout(file_pattern_widget)
+        file_pattern_layout.addWidget(file_pattern_label)
+        file_pattern_layout.addWidget(self._file_pattern_line_edit)
+
+        outer_layout = QFormLayout()
+        outer_layout.addRow("Provide the default search path here.", self._default_path)
+        outer_layout.addRow(file_pattern_widget, search_button)
+        outer_layout.addRow("Folders found in given path", self._found_folders)
+        outer_layout.addRow("Exit button", exit_button)
+        widget.setLayout(outer_layout)
         self.setCentralWidget(widget)
         self.show()
 
-    def run_directory_search(self):
+    def run_search(self):
         if self._thread_counter.count < self._max_thread_count:
-            self._runnable = PathSearchRunnable(self._thread_counter, self._default_path.text())
+            if not self._file_pattern_line_edit.text():
+                self._runnable = PathSearchRunnable(self._thread_counter, self._default_path.text())
+            else:
+                self._runnable = PathSearchRunnable(self._thread_counter, self._default_path.text(), self._file_pattern_line_edit.text())
             self._runnable.signal_search_finished.search_result_ready.connect(self._on_search_button_clicked)
             self._thread_pool.start(self._runnable)
 

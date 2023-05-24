@@ -1,37 +1,32 @@
-from PyQt5.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot, QThreadPool
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QFormLayout, QLabel, QLineEdit, QPushButton
 
-
-class MyRunnable(QRunnable):
-    def __init__(self):
-        super().__init__()
-        self.signals = MySignals()
-
-    def run(self):
-        # Perform your task here and obtain the result
-        result = [1, 2, 3, 4, 5]
-        self.signals.resultReady.emit(result)
-
-class MySignals(QObject):
-    resultReady = pyqtSignal(list)
-
-class MainWindow(QObject):
-    def __init__(self):
-        super().__init__()
-        self.threadpool = QThreadPool()
-        self.runnable = MyRunnable()
-        self.runnable.signals.resultReady.connect(self.handleResult)
-
-    def startTask(self):
-        self.threadpool.start(self.runnable)
-
-    @pyqtSlot(list)
-    def handleResult(self, result):
-        # Process the result obtained from the worker thread
-        print(result)
-
-# Usage example
 app = QApplication([])
-window = MainWindow()
-window.startTask()
+# Create the main widget
+widget = QWidget()
+
+# Create a QVBoxLayout to hold the contents
+layout = QVBoxLayout(widget)
+
+# Create a QFormLayout to be placed within the QVBoxLayout
+form_layout = QFormLayout()
+
+# Add widgets to the QFormLayout
+label1 = QLabel("Label 1")
+line_edit1 = QLineEdit()
+form_layout.addRow(label1, line_edit1)
+
+label2 = QLabel("Label 2")
+line_edit2 = QLineEdit()
+form_layout.addRow(label2, line_edit2)
+
+# Add the QFormLayout to the QVBoxLayout
+layout.addLayout(form_layout)
+
+# Add additional widgets to the QVBoxLayout
+button = QPushButton("Submit")
+layout.addWidget(button)
+
+# Set the main widget as the central widget of the application
+
+widget.show()
 app.exec_()
