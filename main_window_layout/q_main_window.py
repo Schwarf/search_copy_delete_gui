@@ -29,12 +29,10 @@ class MainWindow(QMainWindow):
         self._thread_counter.thread_count_changed.connect(lambda count: print("Thread count is: ", count))
         self._thread_pool = QThreadPool.globalInstance()
 
-    def _start_path_input(self) -> QLineEdit:
+    def _default_path(self) -> QLineEdit:
         start_path_input = QLineEdit(self)
-        start_path_input.move(20, 20)
-        start_path_input.resize(280, 40)
         start_path_input.setValidator(self._start_path_validator)
-        start_path_input.textChanged.connect(self.run_task)
+        start_path_input.textChanged.connect(self.run_directory_search)
         return start_path_input
 
     def _exit_button_clicked(self):
@@ -42,21 +40,19 @@ class MainWindow(QMainWindow):
 
     def _exit_button(self) -> QPushButton:
         exit_button = QPushButton('Exit', self)
-        exit_button.move(20, 80)
+        #exit_button.move(20, 80)
         exit_button.clicked.connect(self._exit_button_clicked)
         return exit_button
 
-    def _output_text_box(self) -> QTextEdit:
+    def _found_folders(self) -> QTextEdit:
         output_text_box = QTextEdit(self)
-        output_text_box.move(120, 120)
-        output_text_box.resize(450, 140)
         output_text_box.setReadOnly(True)
         return output_text_box
 
     def _file_pattern_text_box(self) -> QLineEdit:
         file_pattern_text_box = QLineEdit(self)
         file_pattern_text_box.setValidator(self._sub_path_validator)
-        file_pattern_text_box.textChanged.connect(self.run_task)
+        file_pattern_text_box.textChanged.connect(self.run_directory_search)
         return file_pattern_text_box
 
     def init_ui(self):
@@ -66,23 +62,23 @@ class MainWindow(QMainWindow):
         self.setGeometry(self._left, self._top, self._width, self._height)
         # label
         # Create textbox
-        self._start_path_input = self._start_path_input()
+        self._default_path = self._default_path()
         exit_button = self._exit_button()
-        self._output_text_box = self._output_text_box()
+        self._found_folders = self._found_folders()
         self._file_pattern_text_box = self._file_pattern_text_box()
 
         layout = QFormLayout()
-        layout.addRow("Provide the default search path here.", self._start_path_input)
+        layout.addRow("Provide the default search path here.", self._default_path)
         layout.addRow("File pattern", self._file_pattern_text_box)
-        layout.addRow("Output", self._output_text_box)
+        layout.addRow("Folders found in given path", self._found_folders)
         layout.addRow("Exit button", exit_button)
         widget.setLayout(layout)
         self.setCentralWidget(widget)
         self.show()
 
-    def run_task(self):
+    def run_directory_search(self):
         if self._thread_counter.count < self._max_thread_count:
-            self._runnable = PathSearchRunnable(self._thread_counter, self._start_path_input.text())
+            self._runnable = PathSearchRunnable(self._thread_counter, self._default_path.text())
             self._runnable.signal_search_finished.search_result_ready.connect(self._on_search_button_clicked)
             self._thread_pool.start(self._runnable)
 
@@ -92,6 +88,7 @@ class MainWindow(QMainWindow):
         if len(search_results) == 0:
             color = 'red'
             search_results = ['Invalid path!!!']
-        self._output_text_box.clear()
+        else:
+            self._found_folders.clear()
         for result in search_results:
-            append_text_in_color(self._output_text_box, result, color)
+            append_text_in_color(self._found_folders, result, color)

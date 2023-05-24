@@ -31,23 +31,19 @@ class ThreadCounter(QObject):
         self.thread_count_changed.emit(self._count)
 
 
+
 class PathSearchRunnable(QRunnable):
-    def __init__(self, thread_counter: ThreadCounter, path: str = None) -> None:
+    def __init__(self, thread_counter: ThreadCounter, path: str = None, pattern: str = None) -> None:
         super().__init__()
-        self._is_running = True
         self._thread_counter = thread_counter
         if path is None:
             self._path = pathlib.Path.home()
         else:
             self._path = pathlib.Path(path)
+        self._pattern = pattern
         self.signal_search_finished = SignalSearchFinished()
 
-    @property
-    def is_running(self) -> bool:
-        return self._is_running
-
     def list_directory_paths(self) -> List[pathlib.Path]:
-        self._is_running = False
         path_list = []
         if not self._path.exists():
             return path_list
