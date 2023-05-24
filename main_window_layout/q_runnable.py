@@ -89,10 +89,12 @@ class PathSearchRunnable(QRunnable):
         if not self._path.exists():
             return file_path_list
         if self.ignore_hidden_files:
-            file_path_list = [path for path in itertools.islice(self._path.rglob(self._file_pattern), self._maximum_items) if
+            file_path_list = [path for path in
+                              itertools.islice(self._path.rglob(self._file_pattern), self._maximum_items) if
                               path.is_file() and not path.name.startswith(".")]
         else:
-            file_path_list = [path for path in itertools.islice(self._path.rglob(self._file_pattern), self._maximum_items) if
+            file_path_list = [path for path in
+                              itertools.islice(self._path.rglob(self._file_pattern), self._maximum_items) if
                               path.is_file()]
         return file_path_list
 

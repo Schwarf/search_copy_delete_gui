@@ -25,7 +25,7 @@ class MainWindow(QMainWindow):
         self._sub_path_validator = QRegExpValidator(sub_path_regular_expression)
         self.init_ui()
         # We only use maximum up to half the threads of the system
-        self._max_thread_count = QThreadPool.globalInstance().maxThreadCount()/2
+        self._max_thread_count = QThreadPool.globalInstance().maxThreadCount() / 2
         self._thread_counter = ThreadCounter()
         self._thread_counter.thread_count_changed.connect(lambda count: print("Thread count is: ", count))
         self._thread_pool = QThreadPool.globalInstance()
