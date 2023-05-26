@@ -55,13 +55,6 @@ class ThreadManager(QObject):
             self._thread_pool.start(runnable)
 
     def stop_all_runnables(self) -> None:
-        for i in range(self._thread_pool.activeThreadCount()):
-            runnable = self._thread_pool.thread()
-            if isinstance(runnable, MyRunnable):
-                runnable.stop()
-#        for runnable in self._thread_pool.leasedThreads():
-#            if isinstance(runnable, MyRunnable):
-#                runnable.stop()
         self._thread_pool.waitForDone()
 
 
