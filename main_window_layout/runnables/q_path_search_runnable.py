@@ -1,64 +1,17 @@
 import pathlib
 from typing import List, Generator, Callable
 
-from PyQt5.QtCore import QRunnable, QObject, pyqtSignal, QMutex, QMutexLocker, QThreadPool
+from PyQt5.QtCore import QObject, pyqtSignal
+
+from runnables.q_runnable_interface import RunnableInterface
+from runnables.q_thread_counter import ThreadCounter
 
 
 class SignalSearchFinished(QObject):
     search_result_ready = pyqtSignal(list)
 
 
-class ThreadCounter(QObject):
-    thread_count_changed = pyqtSignal(int)
-
-    def __init__(self) -> None:
-        super().__init__()
-        self._count = 0
-        self.mutex = QMutex()
-
-    @property
-    def count(self) -> int:
-        return self._count
-
-    def increment(self) -> None:
-        mutex_locker = QMutexLocker(self.mutex)
-        self._count += 1
-        self.thread_count_changed.emit(self._count)
-
-    def decrement(self) -> None:
-        mutex_locker = QMutexLocker(self.mutex)
-        self._count -= 1
-        self.thread_count_changed.emit(self._count)
-
-
-class MyRunnable(QRunnable):
-    def stop(self) -> None:
-        pass
-
-    def set_thread_counter(self, thread_counter: ThreadCounter) -> None:
-        pass
-
-
-class ThreadManager(QObject):
-    def __init__(self) -> None:
-        super().__init__()
-        self._max_thread_count = QThreadPool.globalInstance().maxThreadCount() / 2
-        self._thread_pool = QThreadPool.globalInstance()
-        self._thread_counter = ThreadCounter()
-        self._thread_counter.thread_count_changed.connect(lambda count: print("Thread count is: ", count))
-
-    def start_runnable(self, runnable: MyRunnable = None) -> None:
-        if not runnable:
-            raise ValueError("Runnable is None")
-        runnable.set_thread_counter(self._thread_counter)
-        if self._thread_counter.count < self._max_thread_count:
-            self._thread_pool.start(runnable)
-
-    def stop_all_runnables(self) -> None:
-        self._thread_pool.waitForDone()
-
-
-class PathSearchRunnable(MyRunnable):
+class PathSearchRunnable(RunnableInterface):
     def __init__(self, path: str = None, pattern: str = None,
                  ignore_hidden_files: bool = True) -> None:
         super().__init__()

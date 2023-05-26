@@ -5,8 +5,8 @@ from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QLineEdit, QFormLayout, QTextEdit, QCheckBox
 
 from q_misc import append_text_in_color
-from q_runnable import PathSearchRunnable, ThreadManager
-
+from runnables.q_path_search_runnable import PathSearchRunnable
+from runnables.q_thread_manager import ThreadManager
 
 # Subclass QMainWindow to customize your application's main window
 class MainWindow(QMainWindow):
@@ -92,10 +92,9 @@ class MainWindow(QMainWindow):
             runnable = PathSearchRunnable(self._search_path_input.text())
         elif sender == self._ignore_hidden_files_check_box:
             runnable = PathSearchRunnable(self._search_path_input.text(),
-                                                ignore_hidden_files=self._ignore_hidden_files_check_box.checkState() == 2)
+                                          ignore_hidden_files=self._ignore_hidden_files_check_box.checkState() == 2)
         runnable.signal_search_finished.search_result_ready.connect(self._on_search_button_clicked)
         self._thread_manager.start_runnable(runnable)
-
 
     def _on_search_button_clicked(self, search_results: List) -> None:
         """Button Action function"""
