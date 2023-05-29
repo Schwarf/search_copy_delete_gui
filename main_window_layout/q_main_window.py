@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
         self._width = 1920
         self._height = 1080
         start_path_regular_expression = QRegExp("[A-Za-z0-9\-\_\/]+")
-        sub_path_regular_expression = QRegExp("[A-Za-z0-9\-\_\*]+")
+        sub_path_regular_expression = QRegExp("[A-Za-z0-9\-\_\*\.]+")
         self._start_path_validator = QRegExpValidator(start_path_regular_expression)
         self._sub_path_validator = QRegExpValidator(sub_path_regular_expression)
         self.init_ui()
