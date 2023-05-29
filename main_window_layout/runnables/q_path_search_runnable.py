@@ -1,15 +1,15 @@
 import pathlib
 from typing import List, Generator, Callable
 
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSignal, QTimer
 
 from runnables.q_runnable_interface import RunnableInterface
 from runnables.q_thread_counter import ThreadCounter
 
 
-class SignalSearchFinished(QObject):
+class SearchSignalHelper(QObject):
     search_result_ready = pyqtSignal(list)
-
+    search_update = pyqtSignal()
 
 class PathSearchRunnable(RunnableInterface):
     def __init__(self, path: str = None, pattern: str = None,
@@ -23,7 +23,7 @@ class PathSearchRunnable(RunnableInterface):
         else:
             self._path = pathlib.Path(path)
         self._file_pattern = pattern
-        self.signal_search_finished = SignalSearchFinished()
+        self.search_signal_helper = SearchSignalHelper()
         self._maximum_items = 5000
         self._is_running = True
 
@@ -41,6 +41,8 @@ class PathSearchRunnable(RunnableInterface):
                     counter += 1
             except StopIteration:
                 break
+            if counter % 1000 == 0:
+                self.search_signal_helper.search_update.emit()
         return path_list
 
     def _ignore_hidden_files(self, path: pathlib.Path) -> bool:
@@ -64,7 +66,7 @@ class PathSearchRunnable(RunnableInterface):
             filter_function = filter_function and self._ignore_hidden_files
 
         search_list = self._perform_search(path_generator, filter_function)
-        self.signal_search_finished.search_result_ready.emit(search_list)
+        self.search_signal_helper.search_result_ready.emit(search_list)
         self._thread_counter.decrement()
 
     def stop(self) -> None:

@@ -93,8 +93,16 @@ class MainWindow(QMainWindow):
         elif sender == self._ignore_hidden_files_check_box:
             runnable = PathSearchRunnable(self._search_path_input.text(),
                                           ignore_hidden_files=self._ignore_hidden_files_check_box.checkState() == 2)
-        runnable.signal_search_finished.search_result_ready.connect(self._on_search_button_clicked)
+        runnable.search_signal_helper.search_result_ready.connect(self._on_search_button_clicked)
+        runnable.search_signal_helper.search_update.connect(self._on_still_searching)
         self._thread_manager.start_runnable(runnable)
+
+    def _on_still_searching(self):
+        color = 'red'
+        self._search_output.clear()
+        text = "Still searching ... "
+        append_text_in_color(self._search_output, text, color)
+
 
     def _on_search_button_clicked(self, search_results: List) -> None:
         """Button Action function"""

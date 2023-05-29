@@ -1,32 +1,34 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QFormLayout, QLabel, QLineEdit, QPushButton
+from PyQt5.QtCore import QRunnable, QThreadPool, QObject, pyqtSignal, pyqtSlot, QTimer
+from PyQt5.QtWidgets import QApplication
 
+
+class SearchRunnable(QRunnable):
+    progressUpdated = pyqtSignal(int)
+
+    def __init__(self):
+        super().__init__()
+
+    def run(self):
+        # Long-running search operation
+        total_iterations = 1000
+        for i in range(total_iterations):
+            # Perform search iteration
+            # ...
+
+            # Emit progress signal every 100 ms
+            if i % 100 == 0:
+                self.progressUpdated.emit(i * 100 // total_iterations)
+
+# Usage example
 app = QApplication([])
-# Create the main widget
-widget = QWidget()
+thread_pool = QThreadPool.globalInstance()
 
-# Create a QVBoxLayout to hold the contents
-layout = QVBoxLayout(widget)
+def updateProgress(progress):
+    # Update UI with progress information
+    print(f"Search progress: {progress}%")
 
-# Create a QFormLayout to be placed within the QVBoxLayout
-form_layout = QFormLayout()
+runnable = SearchRunnable()
+runnable.progressUpdated.connect(updateProgress)
+thread_pool.start(runnable)
 
-# Add widgets to the QFormLayout
-label1 = QLabel("Label 1")
-line_edit1 = QLineEdit()
-form_layout.addRow(label1, line_edit1)
-
-label2 = QLabel("Label 2")
-line_edit2 = QLineEdit()
-form_layout.addRow(label2, line_edit2)
-
-# Add the QFormLayout to the QVBoxLayout
-layout.addLayout(form_layout)
-
-# Add additional widgets to the QVBoxLayout
-button = QPushButton("Submit")
-layout.addWidget(button)
-
-# Set the main widget as the central widget of the application
-
-widget.show()
 app.exec_()
