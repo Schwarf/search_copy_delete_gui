@@ -26,6 +26,7 @@ class MainWindow(QMainWindow):
         self._sub_path_validator = QRegExpValidator(sub_path_regular_expression)
         self.init_ui()
         self._thread_manager = ThreadManager()
+
         # We only use maximum up to half the threads of the system
 
     def setup_search_path_input(self) -> QLineEdit:
@@ -86,7 +87,7 @@ class MainWindow(QMainWindow):
         outer_layout.addRow("Provide the default search path here.", self._search_path_input)
         outer_layout.addRow(self._search_button, self._file_pattern_input)
         outer_layout.addRow("", self._ignore_hidden_files_check_box)
-        outer_layout.addRow("Number of files found: ", self._file_counter)
+        outer_layout.addRow("Number of folders/files found: ", self._file_counter)
         outer_layout.addRow("Folders/files found in given path (max. 5000)", self._search_output)
         outer_layout.addRow("Exit button", exit_button)
         widget.setLayout(outer_layout)
@@ -126,6 +127,13 @@ class MainWindow(QMainWindow):
             self._search_output.clear()
         for result in search_results:
             append_text_in_color(self._search_output, result, color)
+
+        if search_succeeeded:
+            self._file_counter.clear()
+            if len(search_results) < 5000:
+                self._file_counter.setText(f"{len(search_results)}")
+            else:
+                self._file_counter.setText("5000+")
 
     def on_exit(self):
         self._thread_manager.stop_all_runnables()
