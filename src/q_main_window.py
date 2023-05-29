@@ -40,6 +40,12 @@ class MainWindow(QMainWindow):
         exit_button.clicked.connect(QCoreApplication.instance().quit)
         return exit_button
 
+    def setup_file_counter(self) -> QLineEdit:
+        file_counter = QLineEdit(self)
+        file_counter.setReadOnly(True)
+        file_counter.setText("---")
+        return file_counter
+
     def setup_search_output(self) -> QTextEdit:
         output_text_box = QTextEdit(self)
         output_text_box.setReadOnly(True)
@@ -72,6 +78,7 @@ class MainWindow(QMainWindow):
         self._search_output = self.setup_search_output()
         self._file_pattern_input = self.setup_file_pattern_input()
         self._ignore_hidden_files_check_box = self.setup_ignore_hidden_files_check_box()
+        self._file_counter = self.setup_file_counter()
         exit_button = self.setup_exit_button()
         self._search_button = self.setup_search_button()
 
@@ -79,6 +86,7 @@ class MainWindow(QMainWindow):
         outer_layout.addRow("Provide the default search path here.", self._search_path_input)
         outer_layout.addRow(self._search_button, self._file_pattern_input)
         outer_layout.addRow("", self._ignore_hidden_files_check_box)
+        outer_layout.addRow("Number of files found: ", self._file_counter)
         outer_layout.addRow("Folders/files found in given path (max. 5000)", self._search_output)
         outer_layout.addRow("Exit button", exit_button)
         widget.setLayout(outer_layout)
