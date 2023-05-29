@@ -57,6 +57,11 @@ class MainWindow(QMainWindow):
         file_pattern_text_box.setValidator(self._sub_path_validator)
         return file_pattern_text_box
 
+    def setup_sub_folder_pattern_input(self) -> QLineEdit:
+        sub_folder_text_box = QLineEdit(self)
+        sub_folder_text_box.setValidator(self._sub_path_validator)
+        return sub_folder_text_box
+
     def setup_search_button(self) -> QPushButton:
         search_button = QPushButton("Search file pattern", self)
         search_button.clicked.connect(self.run_search)
@@ -80,12 +85,13 @@ class MainWindow(QMainWindow):
         self._file_pattern_input = self.setup_file_pattern_input()
         self._ignore_hidden_files_check_box = self.setup_ignore_hidden_files_check_box()
         self._file_counter = self.setup_file_counter()
-        exit_button = self.setup_exit_button()
         self._search_button = self.setup_search_button()
-
+        self._sub_folder_pattern_input = self.setup_sub_folder_pattern_input()
+        exit_button = self.setup_exit_button()
         outer_layout = QFormLayout()
         outer_layout.addRow("Provide the default search path here.", self._search_path_input)
         outer_layout.addRow(self._search_button, self._file_pattern_input)
+        outer_layout.addRow("Pattern for sub-folder", self._sub_folder_pattern_input)
         outer_layout.addRow("", self._ignore_hidden_files_check_box)
         outer_layout.addRow("Number of folders/files found: ", self._file_counter)
         outer_layout.addRow("Folders/files found in given path (max. 5000)", self._search_output)
