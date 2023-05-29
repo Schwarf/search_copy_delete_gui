@@ -8,6 +8,7 @@ from q_misc import append_text_in_color
 from runnables.q_path_search_runnable import PathSearchRunnable
 from runnables.q_thread_manager import ThreadManager
 
+
 # Subclass QMainWindow to customize your application's main window
 class MainWindow(QMainWindow):
     """Main Window"""
@@ -94,7 +95,7 @@ class MainWindow(QMainWindow):
             runnable = PathSearchRunnable(self._search_path_input.text(),
                                           ignore_hidden_files=self._ignore_hidden_files_check_box.checkState() == 2)
         runnable.search_signal_helper.search_result_ready.connect(self._on_search_button_clicked)
-        runnable.search_signal_helper.search_update.connect(self._on_still_searching)
+        runnable.search_signal_helper.search_still_ongoing.connect(self._on_still_searching)
         self._thread_manager.start_runnable(runnable)
 
     def _on_still_searching(self):
@@ -103,13 +104,16 @@ class MainWindow(QMainWindow):
         text = "Still searching ... "
         append_text_in_color(self._search_output, text, color)
 
-
-    def _on_search_button_clicked(self, search_results: List) -> None:
+    def _on_search_button_clicked(self, search_succeeeded: bool, search_results: List) -> None:
         """Button Action function"""
         color = 'black'
-        if len(search_results) == 0:
+        if not search_succeeeded:
             color = 'red'
             search_results = ['Invalid path!!!']
+        elif len(search_results) == 0:
+            color = 'red'
+            search_results = ['No results found!']
+            self._search_output.clear()
         else:
             self._search_output.clear()
         for result in search_results:

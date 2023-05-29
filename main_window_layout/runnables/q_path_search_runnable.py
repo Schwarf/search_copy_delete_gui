@@ -1,15 +1,16 @@
 import pathlib
 from typing import List, Generator, Callable
 
-from PyQt5.QtCore import QObject, pyqtSignal, QTimer
+from PyQt5.QtCore import QObject, pyqtSignal
 
 from runnables.q_runnable_interface import RunnableInterface
 from runnables.q_thread_counter import ThreadCounter
 
 
 class SearchSignalHelper(QObject):
-    search_result_ready = pyqtSignal(list)
-    search_update = pyqtSignal()
+    search_result_ready = pyqtSignal(bool, list)
+    search_still_ongoing = pyqtSignal()
+
 
 class PathSearchRunnable(RunnableInterface):
     def __init__(self, path: str = None, pattern: str = None,
@@ -30,8 +31,9 @@ class PathSearchRunnable(RunnableInterface):
     def _perform_search(self, path_generator: Generator[pathlib.Path, None, None],
                         filter_function: Callable[[pathlib.Path], bool]) -> List[pathlib.Path]:
         path_list = []
+        number_of_files_to_emit_ongoing_search_event = 1000
         if not self._path.exists():
-            return path_list
+            return None
         counter = 0
         while self._is_running and counter < self._maximum_items:
             try:
@@ -41,8 +43,8 @@ class PathSearchRunnable(RunnableInterface):
                     counter += 1
             except StopIteration:
                 break
-            if counter % 1000 == 0:
-                self.search_signal_helper.search_update.emit()
+            if counter % number_of_files_to_emit_ongoing_search_event == 0:
+                self.search_signal_helper.search_still_ongoing.emit()
         return path_list
 
     def _ignore_hidden_files(self, path: pathlib.Path) -> bool:
@@ -66,7 +68,10 @@ class PathSearchRunnable(RunnableInterface):
             filter_function = filter_function and self._ignore_hidden_files
 
         search_list = self._perform_search(path_generator, filter_function)
-        self.search_signal_helper.search_result_ready.emit(search_list)
+        if search_list is None:
+            self.search_signal_helper.search_result_ready.emit(False, [])
+        else:
+            self.search_signal_helper.search_result_ready.emit(True, search_list)
         self._thread_counter.decrement()
 
     def stop(self) -> None:
