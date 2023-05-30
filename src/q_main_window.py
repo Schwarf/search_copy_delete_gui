@@ -68,15 +68,14 @@ class MainWindow(QMainWindow):
         self.show()
 
     def run_search(self):
-        sender = self.sender()
         runnable = PathSearchRunnable()
-        if sender == self._search_path_input:
+        if self._search_path_input.text():
             runnable.set_path(self._search_path_input.text())
-        if sender == self._folder_pattern_input:
+        if self._folder_pattern_input:
             runnable.set_folder_pattern(self._folder_pattern_input.text())
-        if sender == self._search_button:
+        if self.sender == self._search_button:
             runnable.set_file_pattern(self._file_pattern_input.text())
-        if sender == self._ignore_hidden_files_check_box:
+        if self.sender == self._ignore_hidden_files_check_box:
             runnable.set_ignore_files(self._ignore_hidden_files_check_box.checkState() == 2)
         runnable.search_signal_helper.search_result_ready.connect(self._on_search_button_clicked)
         runnable.search_signal_helper.search_still_ongoing.connect(self._on_still_searching)

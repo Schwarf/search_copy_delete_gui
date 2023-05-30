@@ -77,7 +77,7 @@ class PathSearchRunnable(RunnableInterface):
             pattern = self._folder_pattern
         if self._file_pattern:
             if pattern:
-                pattern += self._file_pattern
+                pattern += "/"+self._file_pattern
             else:
                 pattern = self._file_pattern
             filter_function = self.is_file
