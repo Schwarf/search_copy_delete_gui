@@ -34,29 +34,42 @@ class PathSearchRunnable(RunnableInterface):
         number_of_files_to_emit_ongoing_search_event = 1000
         if not self._path.exists():
             return None
-        counter = 0
-        while self._is_running and counter < self._maximum_items:
+        item_match_counter = 0
+        item_counter = 0
+        while self._is_running and item_match_counter < self._maximum_items:
             try:
                 path = next(path_generator)
                 if filter_function(path):
                     path_list.append(path)
-                    counter += 1
+                    item_match_counter += 1
             except StopIteration:
                 break
-            if counter % number_of_files_to_emit_ongoing_search_event == 0:
+            if item_counter % number_of_files_to_emit_ongoing_search_event == 0:
                 self.search_signal_helper.search_still_ongoing.emit()
         return path_list
+
+    @staticmethod
+    def is_file(path: pathlib.Path) -> bool:
+        return path.is_file()
+
+    @staticmethod
+    def is_not_hidden(path: pathlib.Path) -> bool:
+        return not path.name.startswith(".")
+
+    @staticmethod
+    def is_directory(path: pathlib.Path) -> bool:
+        return path.is_dir()
 
     def run(self) -> None:
         self._thread_counter.increment()
         path_generator = self._path.iterdir()
-        filter_function = lambda path : path.is_dir()
+        filter_function = self.is_file
         if self._file_pattern:
             path_generator = self._path.rglob(self._file_pattern)
-            filter_function = lambda path : path.is_file()
+            filter_function = self.is_directory
 
         if self.ignore_hidden_files:
-            filter_function = filter_function and (lambda path: not path.name.startswith("."))
+            filter_function = filter_function and self.is_not_hidden
 
         search_list = self._perform_search(path_generator, filter_function)
         if search_list is None:
