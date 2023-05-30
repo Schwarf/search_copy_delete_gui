@@ -47,25 +47,16 @@ class PathSearchRunnable(RunnableInterface):
                 self.search_signal_helper.search_still_ongoing.emit()
         return path_list
 
-    def _ignore_hidden_files(self, path: pathlib.Path) -> bool:
-        return not path.name.startswith(".")
-
-    def _is_file(self, path: pathlib.Path) -> bool:
-        return path.is_file()
-
-    def _is_directory(self, path: pathlib.Path) -> bool:
-        return path.is_dir()
-
     def run(self) -> None:
         self._thread_counter.increment()
         path_generator = self._path.iterdir()
-        filter_function = self._is_directory
+        filter_function = lambda path : path.is_dir()
         if self._file_pattern:
             path_generator = self._path.rglob(self._file_pattern)
-            filter_function = self._is_file
+            filter_function = lambda path : path.is_file()
 
         if self.ignore_hidden_files:
-            filter_function = filter_function and self._ignore_hidden_files
+            filter_function = filter_function and (lambda path: not path.name.startswith("."))
 
         search_list = self._perform_search(path_generator, filter_function)
         if search_list is None:
