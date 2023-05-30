@@ -4,7 +4,7 @@ from PyQt5.QtCore import QRegExp, QCoreApplication
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import QMainWindow, QWidget, QFormLayout
 
-from q_misc import append_text_in_color
+from ui_elements.misc import append_text_in_color
 from runnables.q_path_search_runnable import PathSearchRunnable
 from runnables.q_thread_manager import ThreadManager
 from ui_elements import inputs, outputs
