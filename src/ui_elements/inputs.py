@@ -1,16 +1,9 @@
 from PyQt5.QtWidgets import QLineEdit, QPushButton, QCheckBox
 
 
-def file_pattern_setup(parent, validator) -> QLineEdit:
-    file_pattern_text_box = QLineEdit(parent)
-    file_pattern_text_box.setValidator(validator)
-    return file_pattern_text_box
-
-
-def folder_pattern_setup(parent, validator, slot_function) -> QLineEdit:
+def folder_file_pattern_setup(parent, validator) -> QLineEdit:
     sub_folder_text_box = QLineEdit(parent)
     sub_folder_text_box.setValidator(validator)
-    sub_folder_text_box.textChanged.connect(slot_function)
     return sub_folder_text_box
 
 
@@ -28,7 +21,7 @@ def exit_button_setup(parent, slot_function) -> QPushButton:
 
 
 def search_button_setup(parent, slot_function) -> QPushButton:
-    search_button = QPushButton("Search file pattern", parent)
+    search_button = QPushButton("Folder/file pattern", parent)
     search_button.clicked.connect(slot_function)
     return search_button
 

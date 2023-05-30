@@ -18,8 +18,7 @@ class PathSearchRunnable(RunnableInterface):
         self._thread_counter: ThreadCounter = None
         self._ignore_hidden_files = None
         self._path = pathlib.Path.home()
-        self._file_pattern = None
-        self._folder_pattern = None
+        self._folder_file_pattern = None
         self.search_signal_helper = SearchSignalHelper()
         self._maximum_items = 5000
         self._is_running = True
@@ -27,11 +26,8 @@ class PathSearchRunnable(RunnableInterface):
     def set_path(self, path: str) -> None:
         self._path = pathlib.Path(path)
 
-    def set_folder_pattern(self, folder_pattern: str) -> None:
-        self._folder_pattern = folder_pattern
-
-    def set_file_pattern(self, file_pattern: str) -> None:
-        self._file_pattern = file_pattern
+    def set_folder_file_pattern(self, folder_file_pattern: str) -> None:
+        self._folder_file_pattern = folder_file_pattern
 
     def set_ignore_files(self, ignore_files: bool) -> None:
         self._ignore_hidden_files = ignore_files
@@ -72,20 +68,10 @@ class PathSearchRunnable(RunnableInterface):
         self._thread_counter.increment()
         path_generator = self._path.iterdir()
         filter_function = self.is_directory
-        pattern = None
-        if self._folder_pattern:
-            pattern = self._folder_pattern
-        if self._file_pattern:
-            if pattern:
-                pattern += "/"+self._file_pattern
-            else:
-                pattern = self._file_pattern
-            filter_function = self.is_file
-        if pattern:
-            path_generator = self._path.rglob(pattern)
+        if self._folder_file_pattern:
+            path_generator = self._path.rglob(self._folder_file_pattern)
         if self._ignore_hidden_files:
             filter_function = filter_function and self.is_not_hidden
-
         search_list = self._perform_search(path_generator, filter_function)
         if search_list is None:
             self.search_signal_helper.search_result_ready.emit(False, [])
