@@ -1,12 +1,13 @@
 from typing import List
 
 from PyQt5.QtCore import QRegExp, QCoreApplication
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QFormLayout, QTextEdit, QCheckBox
+from PyQt5.QtGui import QRegExpValidator
+from PyQt5.QtWidgets import QMainWindow, QWidget, QFormLayout
 
 from q_misc import append_text_in_color
 from runnables.q_path_search_runnable import PathSearchRunnable
 from runnables.q_thread_manager import ThreadManager
-from ui_elements.inputs import *
+from ui_elements import inputs, outputs
 
 
 # Subclass QMainWindow to customize your application's main window
@@ -29,39 +30,15 @@ class MainWindow(QMainWindow):
 
         # We only use maximum up to half the threads of the system
 
-    def setup_file_counter(self) -> QLineEdit:
-        file_counter = QLineEdit(self)
-        file_counter.setReadOnly(True)
-        file_counter.setText("---")
-        return file_counter
-
-    def setup_search_output(self) -> QTextEdit:
-        output_text_box = QTextEdit(self)
-        output_text_box.setReadOnly(True)
-        return output_text_box
-
-    def setup_search_button(self) -> QPushButton:
-        search_button = QPushButton("Search file pattern", self)
-        search_button.clicked.connect(self.run_search)
-        return search_button
-
-    def setup_ignore_hidden_files_check_box(self) -> QCheckBox:
-        ignore_hidden_files = QCheckBox("", self)
-        ignore_hidden_files.setCheckState(2)
-        ignore_hidden_files.clicked.connect(self.run_search)
-        return ignore_hidden_files
-
     def create_ui_elements(self):
-        self._search_path_input = default_search_path_setup(self, self._start_path_validator, self.run_search)
-        self._file_pattern_input = file_pattern_setup(self, self._sub_path_validator)
-        self._sub_folder_pattern_input =  sub_folder_pattern_setup(self, self._sub_path_validator)
-        self._exit_button = exit_button_setup(self, QCoreApplication.instance().quit)
-        self._search_output = self.setup_search_output()
-        self._ignore_hidden_files_check_box = self.setup_ignore_hidden_files_check_box()
-        self._file_counter = self.setup_file_counter()
-        self._search_button = self.setup_search_button()
-
-
+        self._search_path_input = inputs.default_search_path_setup(self, self._start_path_validator, self.run_search)
+        self._file_pattern_input = inputs.file_pattern_setup(self, self._sub_path_validator)
+        self._sub_folder_pattern_input = inputs.sub_folder_pattern_setup(self, self._sub_path_validator)
+        self._exit_button = inputs.exit_button_setup(self, QCoreApplication.instance().quit)
+        self._ignore_hidden_files_check_box = inputs.setup_ignore_hidden_files_check_box(self, self.run_search)
+        self._search_button = inputs.search_button_setup(self, self.run_search)
+        self._search_output = outputs.search_output_setup(self)
+        self._file_counter = outputs.file_counter_setup(self)
 
     def init_ui(self):
         """Window Geometry"""
