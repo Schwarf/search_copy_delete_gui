@@ -16,6 +16,14 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self._file_counter = None
+        self._search_output = None
+        self._search_button = None
+        self._ignore_hidden_files_check_box = None
+        self._exit_button = None
+        self._sub_folder_pattern_input = None
+        self._file_pattern_input = None
+        self._search_path_input = None
         self._title = 'Search for files with pattern in directories'
         self._left = 10
         self._top = 10
@@ -33,7 +41,8 @@ class MainWindow(QMainWindow):
     def create_ui_elements(self):
         self._search_path_input = inputs.default_search_path_setup(self, self._start_path_validator, self.run_search)
         self._file_pattern_input = inputs.file_pattern_setup(self, self._sub_path_validator)
-        self._sub_folder_pattern_input = inputs.sub_folder_pattern_setup(self, self._sub_path_validator)
+        self._sub_folder_pattern_input = inputs.sub_folder_pattern_setup(self, self._sub_path_validator,
+                                                                         self.run_search)
         self._exit_button = inputs.exit_button_setup(self, QCoreApplication.instance().quit)
         self._ignore_hidden_files_check_box = inputs.setup_ignore_hidden_files_check_box(self, self.run_search)
         self._search_button = inputs.search_button_setup(self, self.run_search)
@@ -48,7 +57,7 @@ class MainWindow(QMainWindow):
         self.create_ui_elements()
         outer_layout = QFormLayout()
         outer_layout.addRow("Provide the default search path here.", self._search_path_input)
-        outer_layout.addRow("Pattern for sub-folder", self._sub_folder_pattern_input)
+        outer_layout.addRow("Pattern for folders", self._sub_folder_pattern_input)
         outer_layout.addRow("Ignore hidden folders", self._ignore_hidden_files_check_box)
         outer_layout.addRow(self._search_button, self._file_pattern_input)
         outer_layout.addRow("Number of folders/files found: ", self._file_counter)
