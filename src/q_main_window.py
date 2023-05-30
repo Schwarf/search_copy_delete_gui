@@ -1,12 +1,12 @@
 from typing import List
 
 from PyQt5.QtCore import QRegExp, QCoreApplication
-from PyQt5.QtGui import QRegExpValidator
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QLineEdit, QFormLayout, QTextEdit, QCheckBox
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QFormLayout, QTextEdit, QCheckBox
 
 from q_misc import append_text_in_color
 from runnables.q_path_search_runnable import PathSearchRunnable
 from runnables.q_thread_manager import ThreadManager
+from ui_elements.inputs import *
 
 
 # Subclass QMainWindow to customize your application's main window
@@ -29,18 +29,6 @@ class MainWindow(QMainWindow):
 
         # We only use maximum up to half the threads of the system
 
-    def setup_search_path_input(self) -> QLineEdit:
-        default_path = QLineEdit(self)
-        default_path.setValidator(self._start_path_validator)
-        default_path.textChanged.connect(self.run_search)
-        return default_path
-
-    def setup_exit_button(self) -> QPushButton:
-        exit_button = QPushButton('Exit', self)
-        # exit_button.move(20, 80)
-        exit_button.clicked.connect(QCoreApplication.instance().quit)
-        return exit_button
-
     def setup_file_counter(self) -> QLineEdit:
         file_counter = QLineEdit(self)
         file_counter.setReadOnly(True)
@@ -52,50 +40,43 @@ class MainWindow(QMainWindow):
         output_text_box.setReadOnly(True)
         return output_text_box
 
-    def setup_file_pattern_input(self) -> QLineEdit:
-        file_pattern_text_box = QLineEdit(self)
-        file_pattern_text_box.setValidator(self._sub_path_validator)
-        return file_pattern_text_box
-
-    def setup_sub_folder_pattern_input(self) -> QLineEdit:
-        sub_folder_text_box = QLineEdit(self)
-        sub_folder_text_box.setValidator(self._sub_path_validator)
-        return sub_folder_text_box
-
     def setup_search_button(self) -> QPushButton:
         search_button = QPushButton("Search file pattern", self)
         search_button.clicked.connect(self.run_search)
         return search_button
 
     def setup_ignore_hidden_files_check_box(self) -> QCheckBox:
-        ignore_hidden_files = QCheckBox("Ignore hidden folders and files.", self)
+        ignore_hidden_files = QCheckBox("", self)
         ignore_hidden_files.setCheckState(2)
         ignore_hidden_files.clicked.connect(self.run_search)
         return ignore_hidden_files
+
+    def create_ui_elements(self):
+        self._search_path_input = default_search_path_setup(self, self._start_path_validator, self.run_search)
+        self._file_pattern_input = file_pattern_setup(self, self._sub_path_validator)
+        self._sub_folder_pattern_input =  sub_folder_pattern_setup(self, self._sub_path_validator)
+        self._exit_button = exit_button_setup(self, QCoreApplication.instance().quit)
+        self._search_output = self.setup_search_output()
+        self._ignore_hidden_files_check_box = self.setup_ignore_hidden_files_check_box()
+        self._file_counter = self.setup_file_counter()
+        self._search_button = self.setup_search_button()
+
+
 
     def init_ui(self):
         """Window Geometry"""
         widget = QWidget()
         self.setWindowTitle(self._title)
         self.setGeometry(self._left, self._top, self._width, self._height)
-        # label
-        # Create textbox
-        self._search_path_input = self.setup_search_path_input()
-        self._search_output = self.setup_search_output()
-        self._file_pattern_input = self.setup_file_pattern_input()
-        self._ignore_hidden_files_check_box = self.setup_ignore_hidden_files_check_box()
-        self._file_counter = self.setup_file_counter()
-        self._search_button = self.setup_search_button()
-        self._sub_folder_pattern_input = self.setup_sub_folder_pattern_input()
-        exit_button = self.setup_exit_button()
+        self.create_ui_elements()
         outer_layout = QFormLayout()
         outer_layout.addRow("Provide the default search path here.", self._search_path_input)
-        outer_layout.addRow(self._search_button, self._file_pattern_input)
         outer_layout.addRow("Pattern for sub-folder", self._sub_folder_pattern_input)
-        outer_layout.addRow("", self._ignore_hidden_files_check_box)
+        outer_layout.addRow("Ignore hidden folders", self._ignore_hidden_files_check_box)
+        outer_layout.addRow(self._search_button, self._file_pattern_input)
         outer_layout.addRow("Number of folders/files found: ", self._file_counter)
         outer_layout.addRow("Folders/files found in given path (max. 5000)", self._search_output)
-        outer_layout.addRow("Exit button", exit_button)
+        outer_layout.addRow("Exit button", self._exit_button)
         widget.setLayout(outer_layout)
         self.setCentralWidget(widget)
         self.show()
