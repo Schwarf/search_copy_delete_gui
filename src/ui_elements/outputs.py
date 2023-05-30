@@ -7,6 +7,7 @@ def file_counter_setup(parent) -> QLineEdit:
     file_counter.setText("---")
     return file_counter
 
+
 def search_output_setup(parent) -> QTextEdit:
     output_text_box = QTextEdit(parent)
     output_text_box.setReadOnly(True)

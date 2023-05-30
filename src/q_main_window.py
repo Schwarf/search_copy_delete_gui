@@ -21,7 +21,7 @@ class MainWindow(QMainWindow):
         self._search_button = None
         self._ignore_hidden_files_check_box = None
         self._exit_button = None
-        self._sub_folder_pattern_input = None
+        self._folder_pattern_input = None
         self._file_pattern_input = None
         self._search_path_input = None
         self._title = 'Search for files with pattern in directories'
@@ -41,8 +41,8 @@ class MainWindow(QMainWindow):
     def create_ui_elements(self):
         self._search_path_input = inputs.default_search_path_setup(self, self._start_path_validator, self.run_search)
         self._file_pattern_input = inputs.file_pattern_setup(self, self._sub_path_validator)
-        self._sub_folder_pattern_input = inputs.sub_folder_pattern_setup(self, self._sub_path_validator,
-                                                                         self.run_search)
+        self._folder_pattern_input = inputs.folder_pattern_setup(self, self._sub_path_validator,
+                                                                 self.run_search)
         self._exit_button = inputs.exit_button_setup(self, QCoreApplication.instance().quit)
         self._ignore_hidden_files_check_box = inputs.setup_ignore_hidden_files_check_box(self, self.run_search)
         self._search_button = inputs.search_button_setup(self, self.run_search)
@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
         self.create_ui_elements()
         outer_layout = QFormLayout()
         outer_layout.addRow("Provide the default search path here.", self._search_path_input)
-        outer_layout.addRow("Pattern for folders", self._sub_folder_pattern_input)
+        outer_layout.addRow("Pattern for folders", self._folder_pattern_input)
         outer_layout.addRow("Ignore hidden folders", self._ignore_hidden_files_check_box)
         outer_layout.addRow(self._search_button, self._file_pattern_input)
         outer_layout.addRow("Number of folders/files found: ", self._file_counter)
@@ -69,13 +69,15 @@ class MainWindow(QMainWindow):
 
     def run_search(self):
         sender = self.sender()
+        runnable = PathSearchRunnable()
+        if sender == self._search_path_input:
+            runnable.set_path(self._search_path_input.text())
+        if sender == self._folder_pattern_input:
+            runnable.set_folder_pattern(self._folder_pattern_input.text())
         if sender == self._search_button:
-            runnable = PathSearchRunnable(self._search_path_input.text(), self._file_pattern_input.text())
-        elif sender == self._search_path_input:
-            runnable = PathSearchRunnable(self._search_path_input.text())
-        elif sender == self._ignore_hidden_files_check_box:
-            runnable = PathSearchRunnable(self._search_path_input.text(),
-                                          ignore_hidden_files=self._ignore_hidden_files_check_box.checkState() == 2)
+            runnable.set_file_pattern(self._file_pattern_input.text())
+        if sender == self._ignore_hidden_files_check_box:
+            runnable.set_ignore_files(self._ignore_hidden_files_check_box.checkState() == 2)
         runnable.search_signal_helper.search_result_ready.connect(self._on_search_button_clicked)
         runnable.search_signal_helper.search_still_ongoing.connect(self._on_still_searching)
         self._thread_manager.start_runnable(runnable)

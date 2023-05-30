@@ -7,7 +7,7 @@ def file_pattern_setup(parent, validator) -> QLineEdit:
     return file_pattern_text_box
 
 
-def sub_folder_pattern_setup(parent, validator, slot_function) -> QLineEdit:
+def folder_pattern_setup(parent, validator, slot_function) -> QLineEdit:
     sub_folder_text_box = QLineEdit(parent)
     sub_folder_text_box.setValidator(validator)
     sub_folder_text_box.textChanged.connect(slot_function)

@@ -13,20 +13,28 @@ class SearchSignalHelper(QObject):
 
 
 class PathSearchRunnable(RunnableInterface):
-    def __init__(self, path: str = None, pattern: str = None,
-                 ignore_hidden_files: bool = True) -> None:
+    def __init__(self) -> None:
         super().__init__()
         self._thread_counter: ThreadCounter = None
-
-        self.ignore_hidden_files = ignore_hidden_files
-        if path is None:
-            self._path = pathlib.Path.home()
-        else:
-            self._path = pathlib.Path(path)
-        self._file_pattern = pattern
+        self._ignore_hidden_files = None
+        self._path = pathlib.Path.home()
+        self._file_pattern = None
+        self._folder_pattern = None
         self.search_signal_helper = SearchSignalHelper()
         self._maximum_items = 5000
         self._is_running = True
+
+    def set_path(self, path: str) -> None:
+        self._path = pathlib.Path(path)
+
+    def set_folder_pattern(self, folder_pattern: str) -> None:
+        self._folder_pattern = folder_pattern
+
+    def set_file_pattern(self, file_pattern: str) -> None:
+        self._file_pattern = file_pattern
+
+    def set_ignore_files(self, ignore_files: bool) -> None:
+        self._ignore_hidden_files = ignore_files
 
     def _perform_search(self, path_generator: Generator[pathlib.Path, None, None],
                         filter_function: Callable[[pathlib.Path], bool]) -> List[pathlib.Path]:
@@ -63,12 +71,19 @@ class PathSearchRunnable(RunnableInterface):
     def run(self) -> None:
         self._thread_counter.increment()
         path_generator = self._path.iterdir()
-        filter_function = self.is_file
+        filter_function = self.is_directory
+        pattern = None
+        if self._folder_pattern:
+            pattern = self._folder_pattern
         if self._file_pattern:
-            path_generator = self._path.rglob(self._file_pattern)
-            filter_function = self.is_directory
-
-        if self.ignore_hidden_files:
+            if pattern:
+                pattern += self._file_pattern
+            else:
+                pattern = self._file_pattern
+            filter_function = self.is_file
+        if pattern:
+            path_generator = self._path.rglob(pattern)
+        if self._ignore_hidden_files:
             filter_function = filter_function and self.is_not_hidden
 
         search_list = self._perform_search(path_generator, filter_function)
