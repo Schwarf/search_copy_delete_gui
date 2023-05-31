@@ -16,6 +16,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self._show_files_default_search_path_check_box = None
         self._file_counter = None
         self._search_output = None
         self._search_button = None
@@ -23,7 +24,7 @@ class MainWindow(QMainWindow):
         self._exit_button = None
         self._folder_file_pattern_input = None
         self._search_path_input = None
-        self._title = 'Search for files with pattern in directories'
+        self._title = 'Search for files/folders with pattern in directories'
         self._left = 10
         self._top = 10
         self._width = 1920
@@ -42,6 +43,8 @@ class MainWindow(QMainWindow):
         self._folder_file_pattern_input = inputs.folder_file_pattern_setup(self, self._sub_path_validator)
         self._exit_button = inputs.exit_button_setup(self, QCoreApplication.instance().quit)
         self._ignore_hidden_files_check_box = inputs.setup_ignore_hidden_files_check_box(self, self.run_search)
+        self._show_files_default_search_path_check_box = inputs.setup_show_files_default_search_path(self,
+                                                                                                     self.run_search)
         self._search_button = inputs.search_button_setup(self, self.run_search)
         self._search_output = outputs.search_output_setup(self)
         self._file_counter = outputs.file_counter_setup(self)
@@ -54,6 +57,7 @@ class MainWindow(QMainWindow):
         self.create_ui_elements()
         outer_layout = QFormLayout()
         outer_layout.addRow("Provide the default search path here.", self._search_path_input)
+        outer_layout.addRow("Show files in default search path", self._show_files_default_search_path_check_box)
         outer_layout.addRow("Ignore hidden folders", self._ignore_hidden_files_check_box)
         outer_layout.addRow(self._search_button, self._folder_file_pattern_input)
         outer_layout.addRow("Number of folders/files found: ", self._file_counter)
@@ -70,6 +74,7 @@ class MainWindow(QMainWindow):
         if self._folder_file_pattern_input.text():
             runnable.set_folder_file_pattern(self._folder_file_pattern_input.text())
         runnable.set_ignore_files(self._ignore_hidden_files_check_box.checkState() == 2)
+        runnable.set_show_files_in_path(self._show_files_default_search_path_check_box.checkState() == 2)
         runnable.search_signal_helper.search_result_ready.connect(self._on_search_button_clicked)
         runnable.search_signal_helper.search_still_ongoing.connect(self._on_still_searching)
         self._thread_manager.start_runnable(runnable)
@@ -80,10 +85,10 @@ class MainWindow(QMainWindow):
         text = "Still searching ... "
         append_text_in_color(self._search_output, text, color)
 
-    def _on_search_button_clicked(self, search_succeeeded: bool, search_results: List) -> None:
+    def _on_search_button_clicked(self, search_succeeded: bool, search_results: List) -> None:
         """Button Action function"""
         color = 'black'
-        if not search_succeeeded:
+        if not search_succeeded:
             color = 'red'
             search_results = ['Invalid path!!!']
         elif len(search_results) == 0:
@@ -95,7 +100,7 @@ class MainWindow(QMainWindow):
         for result in search_results:
             append_text_in_color(self._search_output, result, color)
 
-        if search_succeeeded:
+        if search_succeeded:
             self._file_counter.clear()
             if len(search_results) < 5000:
                 self._file_counter.setText(f"{len(search_results)}")
