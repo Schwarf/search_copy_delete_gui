@@ -67,7 +67,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
         self.show()
 
-    def run_search(self):
+    def _configure_path_search_runnable(self) -> PathSearchRunnable:
         runnable = PathSearchRunnable()
         if self._search_path_input.text():
             runnable.set_path(self._search_path_input.text())
@@ -77,6 +77,10 @@ class MainWindow(QMainWindow):
         runnable.set_show_files_in_path(self._show_files_default_search_path_check_box.checkState() == 2)
         runnable.search_signal_helper.search_result_ready.connect(self._on_search_button_clicked)
         runnable.search_signal_helper.search_still_ongoing.connect(self._on_still_searching)
+        return runnable
+
+    def run_search(self):
+        runnable = self._configure_path_search_runnable()
         self._thread_manager.start_runnable(runnable)
 
     def _on_still_searching(self):
