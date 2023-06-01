@@ -42,9 +42,9 @@ class MainWindow(QMainWindow):
         self._search_path_input = inputs.default_search_path_setup(self, self._start_path_validator, self.run_search)
         self._folder_file_pattern_input = inputs.folder_file_pattern_setup(self, self._sub_path_validator)
         self._exit_button = inputs.exit_button_setup(self, QCoreApplication.instance().quit)
-        self._ignore_hidden_files_check_box = inputs.setup_ignore_hidden_files_check_box(self, self.run_search)
-        self._show_files_default_search_path_check_box = inputs.setup_show_files_default_search_path(self,
-                                                                                                     self.run_search)
+        self._ignore_hidden_files_check_box = inputs.ignore_hidden_files_check_box_setup(self, self.run_search)
+        self._show_files_default_search_path_check_box = inputs.show_files_default_search_path_check_box_setup(self,
+                                                                                                               self.run_search)
         self._search_button = inputs.search_button_setup(self, self.run_search)
         self._search_output = outputs.search_output_setup(self)
         self._file_counter = outputs.file_counter_setup(self)

@@ -26,14 +26,14 @@ def search_button_setup(parent, slot_function) -> QPushButton:
     return search_button
 
 
-def setup_ignore_hidden_files_check_box(parent, slot_function) -> QCheckBox:
+def ignore_hidden_files_check_box_setup(parent, slot_function) -> QCheckBox:
     ignore_hidden_files = QCheckBox("", parent)
     ignore_hidden_files.setCheckState(2)
     ignore_hidden_files.clicked.connect(slot_function)
     return ignore_hidden_files
 
 
-def setup_show_files_default_search_path(parent, slot_function) -> QCheckBox:
+def show_files_default_search_path_check_box_setup(parent, slot_function) -> QCheckBox:
     show_files_default_search_path = QCheckBox("", parent)
     show_files_default_search_path.setCheckState(0)
     show_files_default_search_path.clicked.connect(slot_function)
