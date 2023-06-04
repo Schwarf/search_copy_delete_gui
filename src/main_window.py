@@ -8,7 +8,7 @@ from runnables.path_search_runnable import PathSearchRunnable
 from runnables.thread_manager import ThreadManager
 from ui_elements.main_window import inputs, outputs
 from ui_elements.misc import append_text_in_color
-from ui_elements import windows
+from ui_elements import copy_dialog_window
 
 
 # Subclass QMainWindow to customize your application's main window
@@ -33,9 +33,9 @@ class MainWindow(QMainWindow):
         self._width = 1920
         self._height = 1080
         start_path_regular_expression = QRegExp("[A-Za-z0-9\-\_\/]+")
-        sub_path_regular_expression = QRegExp("[A-Za-z0-9\-\_\*\.\/]+")
+        folder_file_regular_expression = QRegExp("[A-Za-z0-9\-\_\*\.\/]+")
         self._start_path_validator = QRegExpValidator(start_path_regular_expression)
-        self._sub_path_validator = QRegExpValidator(sub_path_regular_expression)
+        self._folder_file_validator = QRegExpValidator(folder_file_regular_expression)
         self.init_ui()
         self._thread_manager = ThreadManager()
 
@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
 
     def create_ui_elements(self):
         self._search_path_input = inputs.default_search_path_setup(self, self._start_path_validator, self.run_search)
-        self._folder_file_pattern_input = inputs.folder_file_pattern_setup(self, self._sub_path_validator)
+        self._folder_file_pattern_input = inputs.folder_file_pattern_setup(self, self._folder_file_validator)
         self._exit_button = inputs.exit_button_setup(self, QCoreApplication.instance().quit)
         self._ignore_hidden_files_check_box = inputs.ignore_hidden_files_check_box_setup(self, self.run_search)
         self._show_files_default_search_path_check_box = inputs.show_files_default_search_path_check_box_setup(self,
@@ -72,9 +72,18 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
         self.show()
 
+    def configure_copy_dialog_input(self):
+        input ={}
+        input["SearchPathInput"] = self._search_path_input.text()
+        input["FolderFilePattern"] = self._folder_file_pattern_input.text()
+        input["StartPathValidator"]  =self._start_path_validator
+        input["FolderFileValidator"] = self._folder_file_validator
+        return input
+
     def copy_dialog_window(self):
         if self._copy_dialog_window is None:
-            self._copy_dialog_window = windows.open_copy_dialog_window()
+            input = self.configure_copy_dialog_input()
+            self._copy_dialog_window = copy_dialog_window.open_copy_dialog_window(input)
         else:
             self._copy_dialog_window.activateWindow()
 
