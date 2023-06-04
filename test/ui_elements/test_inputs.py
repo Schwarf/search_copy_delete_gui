@@ -2,7 +2,7 @@ import pytest
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import QWidget, QLineEdit, QCheckBox, QPushButton
 
-from ui_elements import inputs
+from main_window import inputs
 
 
 @pytest.fixture()

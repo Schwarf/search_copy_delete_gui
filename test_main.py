@@ -1,34 +1,19 @@
-from PyQt5.QtCore import QRunnable, QThreadPool, QObject, pyqtSignal, pyqtSlot, QTimer
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow
 
 
-class SearchRunnable(QRunnable):
-    progressUpdated = pyqtSignal(int)
+def create_button_with_lambda(parent, text, lambda_func):
+    button = QPushButton(text, parent)
+    button.clicked.connect(lambda: lambda_func())
+    return button
 
-    def __init__(self):
-        super().__init__()
-
-    def run(self):
-        # Long-running search operation
-        total_iterations = 1000
-        for i in range(total_iterations):
-            # Perform search iteration
-            # ...
-
-            # Emit progress signal every 100 ms
-            if i % 100 == 0:
-                self.progressUpdated.emit(i * 100 // total_iterations)
-
-# Usage example
+# Example usage
 app = QApplication([])
-thread_pool = QThreadPool.globalInstance()
+window = QMainWindow()
 
-def updateProgress(progress):
-    # Update UI with progress information
-    print(f"Search progress: {progress}%")
+button_text = "Click Me"
+button_function = lambda: print("Button clicked!")
 
-runnable = SearchRunnable()
-runnable.progressUpdated.connect(updateProgress)
-thread_pool.start(runnable)
+button = create_button_with_lambda(window, button_text, button_function)
+button.show()
 
 app.exec_()

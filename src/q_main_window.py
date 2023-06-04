@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QFormLayout
 
 from runnables.q_path_search_runnable import PathSearchRunnable
 from runnables.q_thread_manager import ThreadManager
-from ui_elements import inputs, outputs
+from main_window import inputs, outputs
 from ui_elements.misc import append_text_in_color
 
 
