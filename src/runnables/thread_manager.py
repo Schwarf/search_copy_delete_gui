@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QObject, QThreadPool
 
-from q_runnable_interface import RunnableInterface
-from q_thread_counter import ThreadCounter
+from runnable_interface import RunnableInterface
+from thread_counter import ThreadCounter
 
 
 class ThreadManager(QObject):

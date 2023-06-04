@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QRunnable
 
-from q_thread_counter import ThreadCounter
+from thread_counter import ThreadCounter
 
 
 class RunnableInterface(QRunnable):

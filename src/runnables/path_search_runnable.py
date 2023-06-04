@@ -3,8 +3,8 @@ from typing import List, Generator, Callable
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
-from runnables.q_runnable_interface import RunnableInterface
-from runnables.q_thread_counter import ThreadCounter
+from runnables.runnable_interface import RunnableInterface
+from runnables.thread_counter import ThreadCounter
 
 
 class SearchSignalHelper(QObject):
