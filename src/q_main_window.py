@@ -24,6 +24,7 @@ class MainWindow(QMainWindow):
         self._exit_button = None
         self._folder_file_pattern_input = None
         self._search_path_input = None
+        self._copy_dialog_button = None
         self._title = 'Search for files/folders with pattern in directories'
         self._left = 10
         self._top = 10
@@ -46,6 +47,7 @@ class MainWindow(QMainWindow):
         self._show_files_default_search_path_check_box = inputs.show_files_default_search_path_check_box_setup(self,
                                                                                                                self.run_search)
         self._search_button = inputs.search_button_setup(self, self.run_search)
+        self._copy_dialog_button = inputs.copy_dialog_button(self, lambda: print("Not implemented yet!"))
         self._search_output = outputs.search_output_setup(self)
         self._file_counter = outputs.file_counter_setup(self)
 
@@ -62,6 +64,7 @@ class MainWindow(QMainWindow):
         outer_layout.addRow(self._search_button, self._folder_file_pattern_input)
         outer_layout.addRow("Number of folders/files found: ", self._file_counter)
         outer_layout.addRow("Folders/files found in given path (max. 5000)", self._search_output)
+        outer_layout.addRow("To copy files please press button", self._copy_dialog_button)
         outer_layout.addRow("Exit button", self._exit_button)
         widget.setLayout(outer_layout)
         self.setCentralWidget(widget)

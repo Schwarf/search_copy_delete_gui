@@ -38,3 +38,9 @@ def show_files_default_search_path_check_box_setup(parent, slot_function) -> QCh
     show_files_default_search_path.setCheckState(0)
     show_files_default_search_path.clicked.connect(slot_function)
     return show_files_default_search_path
+
+
+def copy_dialog_button(parent, slot_function) -> QPushButton:
+    copy_dialog_button = QPushButton("Open copy dialog", parent)
+    copy_dialog_button.clicked.connect(slot_function)
+    return copy_dialog_button
