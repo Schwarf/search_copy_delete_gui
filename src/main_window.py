@@ -26,6 +26,7 @@ class MainWindow(QMainWindow):
         self._folder_file_pattern_input = None
         self._search_path_input = None
         self._copy_dialog_button = None
+        self._copy_dialog_window = None
         self._title = 'Search for files/folders with pattern in directories'
         self._left = 10
         self._top = 10
@@ -48,7 +49,7 @@ class MainWindow(QMainWindow):
         self._show_files_default_search_path_check_box = inputs.show_files_default_search_path_check_box_setup(self,
                                                                                                                self.run_search)
         self._search_button = inputs.search_button_setup(self, self.run_search)
-        self._copy_dialog_button = inputs.copy_dialog_button(self, lambda: windows.open_copy_dialog_window(self))
+        self._copy_dialog_button = inputs.copy_dialog_button(self, self.copy_dialog_window)
         self._search_output = outputs.search_output_setup(self)
         self._file_counter = outputs.file_counter_setup(self)
 
@@ -70,6 +71,13 @@ class MainWindow(QMainWindow):
         widget.setLayout(outer_layout)
         self.setCentralWidget(widget)
         self.show()
+
+    def copy_dialog_window(self):
+        if self._copy_dialog_window is None:
+            self._copy_dialog_window = windows.open_copy_dialog_window()
+        else:
+            self._copy_dialog_window.activateWindow()
+
 
     def _configure_path_search_runnable(self) -> PathSearchRunnable:
         runnable = PathSearchRunnable()
