@@ -6,8 +6,9 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QFormLayout
 
 from runnables.path_search_runnable import PathSearchRunnable
 from runnables.thread_manager import ThreadManager
-from main_window import inputs, outputs
+from ui_elements.main_window import inputs, outputs
 from ui_elements.misc import append_text_in_color
+from ui_elements import windows
 
 
 # Subclass QMainWindow to customize your application's main window
@@ -47,7 +48,7 @@ class MainWindow(QMainWindow):
         self._show_files_default_search_path_check_box = inputs.show_files_default_search_path_check_box_setup(self,
                                                                                                                self.run_search)
         self._search_button = inputs.search_button_setup(self, self.run_search)
-        self._copy_dialog_button = inputs.copy_dialog_button(self, lambda: print("Not implemented yet!"))
+        self._copy_dialog_button = inputs.copy_dialog_button(self, lambda: windows.open_copy_dialog_window(self))
         self._search_output = outputs.search_output_setup(self)
         self._file_counter = outputs.file_counter_setup(self)
 
