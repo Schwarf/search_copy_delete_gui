@@ -1,5 +1,5 @@
 import pathlib
-from typing import List, Generator, Callable
+from typing import List, Generator, Callable, Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
@@ -37,7 +37,7 @@ class PathSearchRunnable(RunnableInterface):
         self._show_files_in_path = show_files
 
     def _perform_search(self, path_generator: Generator[pathlib.Path, None, None],
-                        filter_function: Callable[[pathlib.Path], bool]) -> List[pathlib.Path]:
+                        filter_function: Callable[[pathlib.Path], bool]) -> Optional[List[pathlib.Path]]:
         path_list = []
         number_of_files_to_emit_ongoing_search_event = 1000
         if not self._path.exists():

@@ -81,12 +81,12 @@ class MainWindow(QMainWindow):
         return input
 
     def copy_dialog_window(self):
-        if self._copy_dialog_window is None:
+        if self._copy_dialog_window is None or not self._copy_dialog_window.isVisible():
             input = self.configure_copy_dialog_input()
             self._copy_dialog_window = copy_dialog_window.open_copy_dialog_window(input)
         else:
             self._copy_dialog_window.activateWindow()
-
+        #self._copy_dialog_window.destroyed.connect(help)
 
     def _configure_path_search_runnable(self) -> PathSearchRunnable:
         runnable = PathSearchRunnable()
