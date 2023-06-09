@@ -9,7 +9,7 @@ from runnables.thread_counter import ThreadCounter
 
 class SearchSignalHelper(QObject):
     search_result_ready = pyqtSignal(bool, list)
-    search_still_ongoing = pyqtSignal()
+    search_still_ongoing = pyqtSignal(int)
 
 
 class PathSearchRunnable(RunnableInterface):
@@ -43,11 +43,9 @@ class PathSearchRunnable(RunnableInterface):
         if not self._path.exists():
             return None
         item_match_counter = 0
-        item_counter = 0
-        while self._is_running and item_match_counter < self._maximum_items:
-            item_counter += 1
-            if item_counter % number_of_files_to_emit_ongoing_search_event == 0:
-                self.search_signal_helper.search_still_ongoing.emit()
+        while self._is_running:
+            if item_match_counter % number_of_files_to_emit_ongoing_search_event == 0:
+                self.search_signal_helper.search_still_ongoing.emit(item_match_counter)
             try:
                 path = next(path_generator)
                 if filter_function is None:

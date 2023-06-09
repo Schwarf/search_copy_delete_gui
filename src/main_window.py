@@ -82,11 +82,11 @@ class MainWindow(QMainWindow):
         return input
 
     def copy_dialog_window(self):
-        if self._copy_dialog_window is None or not self._copy_dialog_window.isVisible():
-            input = self.configure_copy_dialog_input()
-            self._copy_dialog_window = copy_dialog_window.open_copy_dialog_window(input)
-        else:
-            self._copy_dialog_window.activateWindow()
+#        if self._copy_dialog_window is None or not self._copy_dialog_window.isVisible():
+        input = self.configure_copy_dialog_input()
+        self._copy_dialog_window = copy_dialog_window.open_copy_dialog_window(input)
+#        else:
+#            self._copy_dialog_window.activateWindow()
         #self._copy_dialog_window.destroyed.connect(help)
 
     def _configure_path_search_runnable(self) -> PathSearchRunnable:
@@ -107,10 +107,11 @@ class MainWindow(QMainWindow):
 
     def run_copy(self):
         pass
-    def _on_still_searching(self):
+
+    def _on_still_searching(self, number_of_hits):
         color = 'red'
         self._search_output.clear()
-        text = "Still searching ... "
+        text = f"Still searching ... So far {number_of_hits} elements found!"
         append_text_in_color(self._search_output, text, color)
 
     def _on_search_button_clicked(self, search_succeeded: bool, search_results: List) -> None:
@@ -130,10 +131,7 @@ class MainWindow(QMainWindow):
 
         if search_succeeded:
             self._file_counter.clear()
-            if len(search_results) < 5000:
-                self._file_counter.setText(f"{len(search_results)}")
-            else:
-                self._file_counter.setText("5000+")
+            self._file_counter.setText(f"{len(search_results)}")
 
     def on_exit(self):
         self._thread_manager.stop_all_runnables()
