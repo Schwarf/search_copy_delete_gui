@@ -78,6 +78,7 @@ class MainWindow(QMainWindow):
         input["FolderFilePattern"] = self._folder_file_pattern_input.text()
         input["StartPathValidator"]  =self._start_path_validator
         input["FolderFileValidator"] = self._folder_file_validator
+        input["CopyRunnable"] = self.run_copy
         return input
 
     def copy_dialog_window(self):
@@ -104,6 +105,8 @@ class MainWindow(QMainWindow):
         runnable = self._configure_path_search_runnable()
         self._thread_manager.start_runnable(runnable)
 
+    def run_copy(self):
+        pass
     def _on_still_searching(self):
         color = 'red'
         self._search_output.clear()
