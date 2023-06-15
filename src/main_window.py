@@ -38,6 +38,7 @@ class MainWindow(QMainWindow):
         self._folder_file_validator = QRegExpValidator(folder_file_regular_expression)
         self.init_ui()
         self._thread_manager = ThreadManager()
+        self._search_results = None
 
         # We only use maximum up to half the threads of the system
 
@@ -141,6 +142,7 @@ class MainWindow(QMainWindow):
             self._search_output.clear()
         else:
             self._search_output.clear()
+        self._search_results = search_results
         for result in search_results:
             append_text_in_color(self._search_output, result, color)
 
