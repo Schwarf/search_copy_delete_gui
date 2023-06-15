@@ -28,7 +28,7 @@ def open_copy_dialog_window(input: Dict[str, Any]) -> QWidget:
 
     outer_layout.addRow("Folder/file pattern",folder_file_pattern)
     outer_layout.addRow("Provide the default copy path here.", default_copy_path)
-    outer_layout.addRow("Provide the destintaion folder here.", destination_folder)
+    outer_layout.addRow("Provide the destination folder here.", destination_folder)
     outer_layout.addRow("Press to copy:", copy_button)
     copy_dialog_window.setLayout(outer_layout)
     copy_dialog_window.show()
