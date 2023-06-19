@@ -1,6 +1,6 @@
 import os
 import platform
-from typing import List
+from typing import List, Dict
 
 from PyQt5.QtCore import QRegExp, QCoreApplication
 from PyQt5.QtGui import QRegExpValidator
@@ -118,7 +118,7 @@ class MainWindow(QMainWindow):
         text = f"Still searching ... So far {number_of_hits} elements found!"
         append_text_in_color(self._search_output, text, color)
 
-    def _on_search_button_clicked(self, search_succeeded: bool, search_results: List) -> None:
+    def _on_search_button_clicked(self, search_succeeded: bool, search_results: List, search_statistics: Dict) -> None:
         """Button Action function"""
         color = 'black'
         if not search_succeeded:
@@ -136,7 +136,7 @@ class MainWindow(QMainWindow):
 
         if search_succeeded:
             self._file_counter.clear()
-            self._file_counter.setText(f"{len(search_results)}")
+            self._file_counter.setText(str(search_statistics["Count"]))
 
     def on_exit(self):
         self._thread_manager.stop_all_runnables()

@@ -3,12 +3,13 @@ from typing import List, Generator, Callable, Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
+from misc.statistics_of_files import StatisticsOfFiles
 from runnables.runnable_interface import RunnableInterface
 from runnables.thread_counter import ThreadCounter
 
 
 class SearchSignalHelper(QObject):
-    search_result_ready = pyqtSignal(bool, list)
+    search_result_ready = pyqtSignal(bool, list, dict)
     search_still_ongoing = pyqtSignal(int)
 
 
@@ -23,6 +24,7 @@ class PathSearchRunnable(RunnableInterface):
         self.search_signal_helper = SearchSignalHelper()
         self._maximum_items = 5000
         self._is_running = True
+        self._stats = StatisticsOfFiles()
 
     def set_path(self, path: str) -> None:
         self._path = pathlib.Path(path)
@@ -42,20 +44,22 @@ class PathSearchRunnable(RunnableInterface):
         number_of_files_to_emit_ongoing_search_event = 1000
         if not self._path.exists():
             return None
-        item_match_counter = 0
         while self._is_running:
-            if item_match_counter % number_of_files_to_emit_ongoing_search_event == 0:
-                self.search_signal_helper.search_still_ongoing.emit(item_match_counter)
+            if self._stats.is_valid() and self._stats.get_statistics()[
+                "Count"] % number_of_files_to_emit_ongoing_search_event == 0:
+                self.search_signal_helper.search_still_ongoing.emit(self._stats.get_statistics()["Count"])
+
             try:
                 path = next(path_generator)
                 if filter_function is None:
                     path_list.append(path)
-                    item_match_counter += 1
+                    self._stats.add_file(path)
                 elif filter_function(path):
                     path_list.append(path)
-                    item_match_counter += 1
+                    self._stats.add_file(path)
             except StopIteration:
                 break
+
         return path_list
 
     @staticmethod
@@ -83,9 +87,9 @@ class PathSearchRunnable(RunnableInterface):
 
         search_list = self._perform_search(path_generator, filter_function)
         if search_list is None:
-            self.search_signal_helper.search_result_ready.emit(False, [])
+            self.search_signal_helper.search_result_ready.emit(False, [], {})
         else:
-            self.search_signal_helper.search_result_ready.emit(True, search_list)
+            self.search_signal_helper.search_result_ready.emit(True, search_list, self._stats.get_statistics())
         self._thread_counter.decrement()
 
     def stop(self) -> None:
