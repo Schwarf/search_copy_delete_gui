@@ -1,3 +1,5 @@
+import os
+import platform
 from typing import List
 
 from PyQt5.QtCore import QRegExp, QCoreApplication
@@ -54,21 +56,6 @@ class MainWindow(QMainWindow):
         self._search_output = outputs.search_output_setup(self)
         self._file_counter = outputs.file_counter_setup(self)
 
-
-    def init(self):
-        widget = QWidget()
-        main_layout = QVBoxLayout()
-        widget.setLayout(main_layout)
-        form_layout = QFormLayout()
-        main_layout.addLayout(form_layout)
-        form_layout.addRow(QLabel("Provide the default search path here: "), self._search_path_input)
-        form_layout.addRow(QLabel("Folder/file pattern: "), self._folder_file_pattern_input)
-        form_layout.addRow(QLabel("Number of folders/files found: "), self._file_counter)
-
-        check_box_layout = QHBoxLayout()
-        check_box_layout.addWidget(QLabel("Show files in default search path: "), self._show_files_default_search_path_check_box)
-        check_box_layout.addWidget(QLabel("Ignore hidden folders: "), self._ignore_hidden_files_check_box)
-        
     def init_ui(self):
         """Window Geometry"""
         widget = QWidget()
@@ -76,6 +63,7 @@ class MainWindow(QMainWindow):
         self.setGeometry(self._left, self._top, self._width, self._height)
         self.create_ui_elements()
         outer_layout = QFormLayout()
+        outer_layout.addRow(QLabel("Detected operating system: "), QLabel(f"{platform.system()}"))
         outer_layout.addRow(QLabel("Provide the default search path here."), self._search_path_input)
         outer_layout.addRow("Show files in default search path", self._show_files_default_search_path_check_box)
         outer_layout.addRow("Ignore hidden folders", self._ignore_hidden_files_check_box)
@@ -142,7 +130,7 @@ class MainWindow(QMainWindow):
             self._search_output.clear()
         else:
             self._search_output.clear()
-        self._search_results = search_results
+        #self._search_results = search_results
         for result in search_results:
             append_text_in_color(self._search_output, result, color)
 
