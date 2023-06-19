@@ -24,7 +24,7 @@ class PathSearchRunnable(RunnableInterface):
         self.search_signal_helper = SearchSignalHelper()
         self._maximum_items = 5000
         self._is_running = True
-        self._stats = StatisticsOfFiles()
+        self._files_statistics = StatisticsOfFiles()
 
     def set_path(self, path: str) -> None:
         self._path = pathlib.Path(path)
@@ -41,22 +41,21 @@ class PathSearchRunnable(RunnableInterface):
     def _perform_search(self, path_generator: Generator[pathlib.Path, None, None],
                         filter_function: Callable[[pathlib.Path], bool]) -> Optional[List[pathlib.Path]]:
         path_list = []
-        number_of_files_to_emit_ongoing_search_event = 1000
         if not self._path.exists():
             return None
         while self._is_running:
-            if self._stats.is_valid() and self._stats.get_statistics()[
-                "Count"] % number_of_files_to_emit_ongoing_search_event == 0:
-                self.search_signal_helper.search_still_ongoing.emit(self._stats.get_statistics()["Count"])
-
+            if self._files_statistics.is_valid():
+                file_count = self._files_statistics.get_statistics()["Count"]
+                if file_count % 1000:
+                    self.search_signal_helper.search_still_ongoing.emit(file_count)
             try:
                 path = next(path_generator)
                 if filter_function is None:
                     path_list.append(path)
-                    self._stats.add_file(path)
+                    self._files_statistics.add_file(path)
                 elif filter_function(path):
                     path_list.append(path)
-                    self._stats.add_file(path)
+                    self._files_statistics.add_file(path)
             except StopIteration:
                 break
 
@@ -89,7 +88,7 @@ class PathSearchRunnable(RunnableInterface):
         if search_list is None:
             self.search_signal_helper.search_result_ready.emit(False, [], {})
         else:
-            self.search_signal_helper.search_result_ready.emit(True, search_list, self._stats.get_statistics())
+            self.search_signal_helper.search_result_ready.emit(True, search_list, self._files_statistics.get_statistics())
         self._thread_counter.decrement()
 
     def stop(self) -> None:
