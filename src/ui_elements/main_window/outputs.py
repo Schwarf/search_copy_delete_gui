@@ -1,11 +1,11 @@
 from PyQt5.QtWidgets import QLineEdit, QTextEdit
 
 
-def file_counter_setup(parent) -> QLineEdit:
-    file_counter = QLineEdit(parent)
-    file_counter.setReadOnly(True)
-    file_counter.setText("---")
-    return file_counter
+def initialize_read_only_qline_edit(parent) -> QLineEdit:
+    qline_edit = QLineEdit(parent)
+    qline_edit.setReadOnly(True)
+    qline_edit.setText("---")
+    return qline_edit
 
 
 def search_output_setup(parent) -> QTextEdit:

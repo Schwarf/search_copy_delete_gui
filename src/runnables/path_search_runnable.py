@@ -6,7 +6,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from misc.statistics_of_files import StatisticsOfFiles
 from runnables.runnable_interface import RunnableInterface
 from runnables.thread_counter import ThreadCounter
-
+from misc.dictionary_string_keys import *
 
 class SearchSignalHelper(QObject):
     search_result_ready = pyqtSignal(bool, list, dict)
@@ -45,17 +45,19 @@ class PathSearchRunnable(RunnableInterface):
             return None
         while self._is_running:
             if self._files_statistics.is_valid():
-                file_count = self._files_statistics.get_statistics()["Count"]
+                file_count = self._files_statistics.get_statistics()[FILE_COUNT]
                 if file_count % 1000:
                     self.search_signal_helper.search_still_ongoing.emit(file_count)
             try:
                 path = next(path_generator)
                 if filter_function is None:
                     path_list.append(path)
-                    self._files_statistics.add_file(path)
+                    if path.is_file:
+                        self._files_statistics.add_file(path)
                 elif filter_function(path):
                     path_list.append(path)
-                    self._files_statistics.add_file(path)
+                    if path.is_file:
+                        self._files_statistics.add_file(path)
             except StopIteration:
                 break
 

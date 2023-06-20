@@ -1,6 +1,6 @@
 import pathlib
 from typing import Dict
-
+from dictionary_string_keys import *
 
 # We assume that the existence of the files has already been established
 class StatisticsOfFiles:
@@ -31,5 +31,5 @@ class StatisticsOfFiles:
     def get_statistics(self) -> Dict[str, int]:
         if self._number_of_files is None:
             return {}
-        return {"Smallest": self._smallest_file_size, "Largest": self._largest_file_size, "Count":
-            self._number_of_files, "Sum": self._size_of_all_files}
+        return {SMALLEST_FILE: self._smallest_file_size, LARGEST_FILE: self._largest_file_size, FILE_COUNT:
+            self._number_of_files, SUM_OF_FILE_SIZES: self._size_of_all_files}

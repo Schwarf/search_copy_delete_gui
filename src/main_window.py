@@ -1,4 +1,3 @@
-import os
 import platform
 from typing import List, Dict
 
@@ -11,7 +10,8 @@ from runnables.thread_manager import ThreadManager
 from ui_elements.main_window import inputs, outputs
 from ui_elements.misc import append_text_in_color
 from ui_elements import copy_dialog_window
-
+from misc.byte_format import format_size
+from misc.dictionary_string_keys import *
 
 # Subclass QMainWindow to customize your application's main window
 class MainWindow(QMainWindow):
@@ -21,6 +21,9 @@ class MainWindow(QMainWindow):
         super().__init__()
         self._show_files_default_search_path_check_box = None
         self._file_counter = None
+        self._smallest_file = None
+        self._largest_file = None
+        self._files_sum = None
         self._search_output = None
         self._search_button = None
         self._ignore_hidden_files_check_box = None
@@ -54,7 +57,10 @@ class MainWindow(QMainWindow):
         self._search_button = inputs.search_button_setup(self, self.run_search)
         self._copy_dialog_button = inputs.copy_dialog_button(self, self.copy_dialog_window)
         self._search_output = outputs.search_output_setup(self)
-        self._file_counter = outputs.file_counter_setup(self)
+        self._file_counter = outputs.initialize_read_only_qline_edit(self)
+        self._largest_file = outputs.initialize_read_only_qline_edit(self)
+        self._smallest_file = outputs.initialize_read_only_qline_edit(self)
+        self._files_sum = outputs.initialize_read_only_qline_edit(self)
 
     def init_ui(self):
         """Window Geometry"""
@@ -69,6 +75,9 @@ class MainWindow(QMainWindow):
         outer_layout.addRow("Ignore hidden folders", self._ignore_hidden_files_check_box)
         outer_layout.addRow(self._search_button, self._folder_file_pattern_input)
         outer_layout.addRow("Number of folders/files found: ", self._file_counter)
+        outer_layout.addRow("Smallest file: ", self._smallest_file)
+        outer_layout.addRow("Largest file: ", self._largest_file)
+        outer_layout.addRow("Total memory of files found: ", self._files_sum)
         outer_layout.addRow("Folders/files found in given path (max. 5000)", self._search_output)
         outer_layout.addRow("To copy files please press button", self._copy_dialog_button)
         outer_layout.addRow("Exit button", self._exit_button)
@@ -136,7 +145,13 @@ class MainWindow(QMainWindow):
 
         if search_succeeded:
             self._file_counter.clear()
-            self._file_counter.setText(str(search_statistics["Count"]))
+            self._file_counter.setText(str(search_statistics[FILE_COUNT]))
+            if SUM_OF_FILE_SIZES in search_statistics:
+                self._files_sum.setText(format_size(search_statistics[SUM_OF_FILE_SIZES]))
+            if LARGEST_FILE in search_statistics:
+                self._largest_file.setText(format_size(search_statistics[LARGEST_FILE]))
+            if SMALLEST_FILE in search_statistics:
+                self._smallest_file.setText(format_size(search_statistics[SMALLEST_FILE]))
 
     def on_exit(self):
         self._thread_manager.stop_all_runnables()
