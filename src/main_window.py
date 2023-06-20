@@ -145,7 +145,11 @@ class MainWindow(QMainWindow):
 
         if search_succeeded:
             self._file_counter.clear()
-            self._file_counter.setText(str(search_statistics[FILE_COUNT]))
+            self._files_sum.clear()
+            self._largest_file.clear()
+            self._smallest_file.clear()
+            if FILE_COUNT in search_statistics:
+                self._file_counter.setText(str(search_statistics[FILE_COUNT]))
             if SUM_OF_FILE_SIZES in search_statistics:
                 self._files_sum.setText(format_size(search_statistics[SUM_OF_FILE_SIZES]))
             if LARGEST_FILE in search_statistics:

@@ -52,11 +52,11 @@ class PathSearchRunnable(RunnableInterface):
                 path = next(path_generator)
                 if filter_function is None:
                     path_list.append(path)
-                    if path.is_file:
+                    if path.is_file():
                         self._files_statistics.add_file(path)
                 elif filter_function(path):
                     path_list.append(path)
-                    if path.is_file:
+                    if path.is_file():
                         self._files_statistics.add_file(path)
             except StopIteration:
                 break
