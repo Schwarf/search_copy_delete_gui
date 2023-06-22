@@ -1,5 +1,6 @@
 import platform
-from typing import List, Dict, OrderedDict
+from typing import Dict
+from collections import OrderedDict
 
 from PyQt5.QtCore import QRegExp, QCoreApplication
 from PyQt5.QtGui import QRegExpValidator
@@ -68,19 +69,24 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(self._title)
         self.setGeometry(self._left, self._top, self._width, self._height)
         self.create_ui_elements()
-        outer_layout = QFormLayout()
-        outer_layout.addRow(QLabel("Detected operating system: "), QLabel(f"{platform.system()}"))
-        outer_layout.addRow(QLabel("Provide the default search path here."), self._search_path_input)
-        outer_layout.addRow("Show files in default search path", self._show_files_default_search_path_check_box)
-        outer_layout.addRow("Ignore hidden folders", self._ignore_hidden_files_check_box)
-        outer_layout.addRow(self._search_button, self._folder_file_pattern_input)
-        outer_layout.addRow("Number of folders/files found: ", self._file_counter)
-        outer_layout.addRow("Smallest file: ", self._smallest_file)
-        outer_layout.addRow("Largest file: ", self._largest_file)
-        outer_layout.addRow("Total memory of files found: ", self._files_sum)
-        outer_layout.addRow("Folders/files found in given path (max. 5000)", self._search_output)
-        outer_layout.addRow("To copy files please press button", self._copy_dialog_button)
-        outer_layout.addRow("Exit button", self._exit_button)
+        outer_layout = QVBoxLayout()
+        upper_form_layout = QFormLayout()
+        upper_form_layout.addRow(QLabel("Detected operating system: "), QLabel(f"{platform.system()}"))
+        upper_form_layout.addRow(QLabel("Provide the default search path here."), self._search_path_input)
+        upper_form_layout.addRow("Show files in default search path", self._show_files_default_search_path_check_box)
+        upper_form_layout.addRow("Ignore hidden folders", self._ignore_hidden_files_check_box)
+        upper_form_layout.addRow(self._search_button, self._folder_file_pattern_input)
+        upper_form_layout.addRow("Number of folders/files found: ", self._file_counter)
+        upper_form_layout.addRow("Smallest file: ", self._smallest_file)
+        upper_form_layout.addRow("Largest file: ", self._largest_file)
+        upper_form_layout.addRow("Total memory of files found: ", self._files_sum)
+        #upper_from_layout.addRow("Folders/files found in given path (max. 5000)", self._search_output)
+        
+        lower_form_layout = QFormLayout()
+        lower_form_layout.addRow("To copy files please press button", self._copy_dialog_button)
+        lower_form_layout.addRow("Exit button", self._exit_button)
+        outer_layout.addLayout(upper_form_layout)
+        outer_layout.addLayout(lower_form_layout)
         widget.setLayout(outer_layout)
         self.setCentralWidget(widget)
         self.show()
