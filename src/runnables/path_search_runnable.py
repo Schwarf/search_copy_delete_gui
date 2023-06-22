@@ -1,5 +1,6 @@
 import pathlib
 from typing import List, Generator, Callable, Optional
+from collections import OrderedDict
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
@@ -9,7 +10,7 @@ from runnables.thread_counter import ThreadCounter
 from misc.dictionary_string_keys import *
 
 class SearchSignalHelper(QObject):
-    search_result_ready = pyqtSignal(bool, list, dict)
+    search_result_ready = pyqtSignal(bool, OrderedDict, dict)
     search_still_ongoing = pyqtSignal(int)
 
 
@@ -39,8 +40,8 @@ class PathSearchRunnable(RunnableInterface):
         self._show_files_in_path = show_files
 
     def _perform_search(self, path_generator: Generator[pathlib.Path, None, None],
-                        filter_function: Callable[[pathlib.Path], bool]) -> Optional[List[pathlib.Path]]:
-        path_list = []
+                        filter_function: Callable[[pathlib.Path], bool]) -> Optional[OrderedDict]:
+        sorted_path_list = OrderedDict()
         if not self._path.exists():
             return None
         while self._is_running:
@@ -51,17 +52,19 @@ class PathSearchRunnable(RunnableInterface):
             try:
                 path = next(path_generator)
                 if filter_function is None:
-                    path_list.append(path)
                     if path.is_file():
-                        self._files_statistics.add_file(path)
+                        sorted_path_list[self._files_statistics.add_file_and_return_size(path)] = path
+                    else:
+                        sorted_path_list[hash(path)] = path
                 elif filter_function(path):
-                    path_list.append(path)
                     if path.is_file():
-                        self._files_statistics.add_file(path)
+                        sorted_path_list[self._files_statistics.add_file_and_return_size(path)] = path
+                    else:
+                        sorted_path_list[hash(path)] = path
             except StopIteration:
                 break
 
-        return path_list
+        return sorted_path_list
 
     @staticmethod
     def is_not_hidden(path: pathlib.Path) -> bool:
@@ -86,11 +89,11 @@ class PathSearchRunnable(RunnableInterface):
             else:
                 filter_function = lambda path: self.is_directory(path) and self.is_not_hidden(path)
 
-        search_list = self._perform_search(path_generator, filter_function)
-        if search_list is None:
-            self.search_signal_helper.search_result_ready.emit(False, [], {})
+        sorted_path_list: OrderedDict = self._perform_search(path_generator, filter_function)
+        if sorted_path_list is None:
+            self.search_signal_helper.search_result_ready.emit(False, OrderedDict(), {})
         else:
-            self.search_signal_helper.search_result_ready.emit(True, search_list, self._files_statistics.get_statistics())
+            self.search_signal_helper.search_result_ready.emit(True, sorted_path_list, self._files_statistics.get_statistics())
         self._thread_counter.decrement()
 
     def stop(self) -> None:

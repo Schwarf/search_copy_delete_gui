@@ -2,6 +2,7 @@ import pathlib
 from typing import Dict
 from dictionary_string_keys import *
 
+
 # We assume that the existence of the files has already been established
 class StatisticsOfFiles:
     def __init__(self) -> None:
@@ -11,7 +12,7 @@ class StatisticsOfFiles:
         self._number_of_files = None
         self._is_valid = False
 
-    def add_file(self, path: pathlib.Path) -> None:
+    def add_file_and_return_size(self, path: pathlib.Path) -> None:
         size = path.stat().st_size
         self._is_valid = True
         if self._number_of_files is None:
@@ -24,6 +25,7 @@ class StatisticsOfFiles:
             self._largest_file_size = max(self._largest_file_size, size)
             self._size_of_all_files += size
             self._number_of_files += 1
+        return size
 
     def is_valid(self):
         return self._is_valid
