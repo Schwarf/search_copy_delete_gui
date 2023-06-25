@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QLineEdit, QTextEdit
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QLineEdit, QTextEdit, QTableWidget, QHeaderView, QTableWidgetItem
 
 
 def initialize_read_only_qline_edit(parent) -> QLineEdit:
@@ -8,7 +9,22 @@ def initialize_read_only_qline_edit(parent) -> QLineEdit:
     return qline_edit
 
 
-def search_output_setup(parent) -> QTextEdit:
-    output_text_box = QTextEdit(parent)
-    output_text_box.setReadOnly(True)
-    return output_text_box
+def output_table(parent) -> QTableWidget:
+    table = QTableWidget(parent)
+    table.setColumnCount(2)
+    # self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+    # self.table.setColumnWidth(0, 1500)
+    table.verticalHeader().hide()
+    table.setShowGrid(False)
+    table.verticalHeader().setDefaultSectionSize(2)
+    table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+    table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+    table.setHorizontalHeaderLabels(["Path", "Size"])
+    return table
+
+
+def add_one_signal_item_table(text: str, table: QTableWidget):
+    table.setRowCount(1)
+    item = QTableWidgetItem(text)
+    item.setForeground(Qt.red)
+    table.setItem(0, 0, item)

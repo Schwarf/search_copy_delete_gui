@@ -3,8 +3,8 @@ from typing import Dict
 
 from PyQt5.QtCore import QRegExp, QCoreApplication, Qt
 from PyQt5.QtGui import QRegExpValidator
-from PyQt5.QtWidgets import QMainWindow, QWidget, QFormLayout, QLabel, QVBoxLayout, QTableWidget, QTableWidgetItem, \
-    QHeaderView
+from PyQt5.QtWidgets import QMainWindow, QWidget, QFormLayout, QLabel, QVBoxLayout, QTableWidgetItem
+
 
 from misc.byte_format import format_size
 from misc.dictionary_string_keys import *
@@ -54,6 +54,7 @@ class MainWindow(QMainWindow):
         self._ignore_hidden_files_check_box = inputs.ignore_hidden_files_check_box_setup(self, self.run_search)
         self._show_files_default_search_path_check_box = inputs.show_files_default_search_path_check_box_setup(self,
                                                                                                                self.run_search)
+        self._table = outputs.output_table(self)
         self._search_button = inputs.search_button_setup(self, self.run_search)
         self._copy_dialog_button = inputs.copy_dialog_button(self, self.copy_dialog_window)
         self._file_counter = outputs.initialize_read_only_qline_edit(self)
@@ -68,16 +69,7 @@ class MainWindow(QMainWindow):
         self.setGeometry(self._left, self._top, self._width, self._height)
         self.create_ui_elements()
         outer_layout = QVBoxLayout()
-        self.table = QTableWidget(self)
-        self.table.setColumnCount(2)
-        # self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        # self.table.setColumnWidth(0, 1500)
-        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        self.table.setHorizontalHeaderLabels(["Path", "Size"])
-
-        self.setCentralWidget(self.table)
-
+        self.setCentralWidget(self._table)
         upper_form_layout = QFormLayout()
         upper_form_layout.addRow(QLabel("Detected operating system: "), QLabel(f"{platform.system()}"))
         upper_form_layout.addRow(QLabel("Provide the default search path here."), self._search_path_input)
@@ -94,7 +86,7 @@ class MainWindow(QMainWindow):
         lower_form_layout.addRow("To copy files please press button", self._copy_dialog_button)
         lower_form_layout.addRow("Exit button", self._exit_button)
         outer_layout.addLayout(upper_form_layout)
-        outer_layout.addWidget(self.table)
+        outer_layout.addWidget(self._table)
         outer_layout.addLayout(lower_form_layout)
         widget.setLayout(outer_layout)
         self.setCentralWidget(widget)
@@ -138,50 +130,34 @@ class MainWindow(QMainWindow):
         pass
 
     def _on_still_searching(self, number_of_hits):
-        color = 'red'
-        self.table.setRowCount(1)
         text = f"Still searching ... So far {number_of_hits} elements found!"
-        item = QTableWidgetItem(text)
-        item.setForeground(Qt.red)
-        self.table.setItem(0, 0, item)
+        outputs.add_one_signal_item_table(text, self._table)
 
     def _on_search_button_clicked(self, search_succeeded: bool, sorted_path_list: Dict,
                                   search_statistics: Dict) -> None:
         """Button Action function"""
         if not search_succeeded:
             text = "Invalid path!!!"
-            self.table.setRowCount(0)
-            self.table.insertRow(0)
-            item = QTableWidgetItem(text)
-            item.setForeground(Qt.red)
-            self.table.setItem(0,0, item)
+            outputs.add_one_signal_item_table(text, self._table)
             return
         elif len(sorted_path_list) == 0:
             text = "No results found!"
-            self.table.setRowCount(0)
-            self.table.insertRow(0)
-            item = QTableWidgetItem(text)
-            item.setForeground(Qt.red)
-            self.table.setItem(0, 0, item)
+            outputs.add_one_signal_item_table(text, self._table)
             return
 
         # self._search_results = search_results
         row = 0
-        self.table.setRowCount(len(sorted_path_list))
-        self.table.verticalHeader().hide()
-        self.table.setShowGrid(False)
-        self.table.verticalHeader().setDefaultSectionSize(20)
+        self._table.setRowCount(len(sorted_path_list))
 
         for size_or_hash, path in sorted_path_list.items():
             # append_text_in_color(self._search_output, path, color)
-            print(f"Path: {str(path)}, size: {size_or_hash}")
             path_item = QTableWidgetItem(str(path))
-            self.table.setItem(row, 0, path_item)
+            self._table.setItem(row, 0, path_item)
 
             size_item = QTableWidgetItem()
             if hash(path) != size_or_hash:
                 size_item = QTableWidgetItem(format_size(size_or_hash))
-            self.table.setItem(row, 1, size_item)
+            self._table.setItem(row, 1, size_item)
             row += 1
 
         if search_succeeded:
