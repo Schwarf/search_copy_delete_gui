@@ -1,5 +1,5 @@
 import platform
-from typing import List, Dict, OrderedDict
+from typing import Dict
 
 from PyQt5.QtCore import QRegExp, QCoreApplication
 from PyQt5.QtGui import QRegExpValidator
@@ -127,15 +127,15 @@ class MainWindow(QMainWindow):
         text = f"Still searching ... So far {number_of_hits} elements found!"
         append_text_in_color(self._search_output, text, color)
 
-    def _on_search_button_clicked(self, search_succeeded: bool, sorted_path_list: OrderedDict, search_statistics: Dict) -> None:
+    def _on_search_button_clicked(self, search_succeeded: bool, sorted_path_list: dict, search_statistics: Dict) -> None:
         """Button Action function"""
         color = 'black'
         if not search_succeeded:
             color = 'red'
-            sorted_path_list = OrderedDict({0: 'Invalid path!!!'})
+            sorted_path_list = dict({0: 'Invalid path!!!'})
         elif len(sorted_path_list) == 0:
             color = 'red'
-            sorted_path_list = OrderedDict({0: 'No results found!'})
+            sorted_path_list = dict({0: 'No results found!'})
             self._search_output.clear()
         else:
             self._search_output.clear()

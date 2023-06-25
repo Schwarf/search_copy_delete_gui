@@ -1,6 +1,5 @@
 import pathlib
-from typing import List, Generator, Callable, Optional
-from collections import OrderedDict
+from typing import List, Generator, Callable, Optional, Dict
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
@@ -10,7 +9,7 @@ from runnables.thread_counter import ThreadCounter
 from misc.dictionary_string_keys import *
 
 class SearchSignalHelper(QObject):
-    search_result_ready = pyqtSignal(bool, OrderedDict, dict)
+    search_result_ready = pyqtSignal(bool, dict, dict)
     search_still_ongoing = pyqtSignal(int)
 
 
@@ -40,8 +39,8 @@ class PathSearchRunnable(RunnableInterface):
         self._show_files_in_path = show_files
 
     def _perform_search(self, path_generator: Generator[pathlib.Path, None, None],
-                        filter_function: Callable[[pathlib.Path], bool]) -> Optional[OrderedDict]:
-        sorted_path_list = OrderedDict()
+                        filter_function: Callable[[pathlib.Path], bool]) -> Optional[Dict]:
+        sorted_path_list = dict()
         if not self._path.exists():
             return None
         while self._is_running:
@@ -89,9 +88,9 @@ class PathSearchRunnable(RunnableInterface):
             else:
                 filter_function = lambda path: self.is_directory(path) and self.is_not_hidden(path)
 
-        sorted_path_list: OrderedDict = self._perform_search(path_generator, filter_function)
+        sorted_path_list: dict = self._perform_search(path_generator, filter_function)
         if sorted_path_list is None:
-            self.search_signal_helper.search_result_ready.emit(False, OrderedDict(), {})
+            self.search_signal_helper.search_result_ready.emit(False, {}, {})
         else:
             self.search_signal_helper.search_result_ready.emit(True, sorted_path_list, self._files_statistics.get_statistics())
         self._thread_counter.decrement()
