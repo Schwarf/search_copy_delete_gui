@@ -1,18 +1,19 @@
 import platform
-from typing import Dict
 from collections import OrderedDict
+from typing import Dict
 
 from PyQt5.QtCore import QRegExp, QCoreApplication
 from PyQt5.QtGui import QRegExpValidator
-from PyQt5.QtWidgets import QMainWindow, QWidget, QFormLayout, QLabel, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QMainWindow, QWidget, QFormLayout, QLabel, QVBoxLayout, QTableWidget, QTableWidgetItem
 
-from runnables.path_search_runnable import PathSearchRunnable
-from runnables.thread_manager import ThreadManager
-from ui_elements.main_window import inputs, outputs
-from ui_elements.misc import append_text_in_color
-from ui_elements import copy_dialog_window
 from misc.byte_format import format_size
 from misc.dictionary_string_keys import *
+from runnables.path_search_runnable import PathSearchRunnable
+from runnables.thread_manager import ThreadManager
+from ui_elements import copy_dialog_window
+from ui_elements.main_window import inputs, outputs
+from ui_elements.misc import append_text_in_color
+
 
 # Subclass QMainWindow to customize your application's main window
 class MainWindow(QMainWindow):
@@ -70,6 +71,12 @@ class MainWindow(QMainWindow):
         self.setGeometry(self._left, self._top, self._width, self._height)
         self.create_ui_elements()
         outer_layout = QVBoxLayout()
+        self.table = QTableWidget(self)
+        self.table.setColumnCount(2)
+        self.table.setHorizontalHeaderLabels(["Path", "Size"])
+
+        self.setCentralWidget(self.table)
+
         upper_form_layout = QFormLayout()
         upper_form_layout.addRow(QLabel("Detected operating system: "), QLabel(f"{platform.system()}"))
         upper_form_layout.addRow(QLabel("Provide the default search path here."), self._search_path_input)
@@ -80,33 +87,35 @@ class MainWindow(QMainWindow):
         upper_form_layout.addRow("Smallest file: ", self._smallest_file)
         upper_form_layout.addRow("Largest file: ", self._largest_file)
         upper_form_layout.addRow("Total memory of files found: ", self._files_sum)
-        #upper_from_layout.addRow("Folders/files found in given path (max. 5000)", self._search_output)
-        
+        # upper_from_layout.addRow("Folders/files found in given path (max. 5000)", self._search_output)
+
         lower_form_layout = QFormLayout()
         lower_form_layout.addRow("To copy files please press button", self._copy_dialog_button)
         lower_form_layout.addRow("Exit button", self._exit_button)
         outer_layout.addLayout(upper_form_layout)
+        outer_layout.addWidget(self.table)
         outer_layout.addLayout(lower_form_layout)
         widget.setLayout(outer_layout)
         self.setCentralWidget(widget)
         self.show()
 
     def configure_copy_dialog_input(self):
-        input ={}
+        input = {}
         input["SearchPathInput"] = self._search_path_input.text()
         input["FolderFilePattern"] = self._folder_file_pattern_input.text()
-        input["StartPathValidator"]  =self._start_path_validator
+        input["StartPathValidator"] = self._start_path_validator
         input["FolderFileValidator"] = self._folder_file_validator
         input["CopyRunnable"] = self.run_copy
         return input
 
     def copy_dialog_window(self):
-#        if self._copy_dialog_window is None or not self._copy_dialog_window.isVisible():
+        #        if self._copy_dialog_window is None or not self._copy_dialog_window.isVisible():
         input = self.configure_copy_dialog_input()
         self._copy_dialog_window = copy_dialog_window.open_copy_dialog_window(input)
-#        else:
-#            self._copy_dialog_window.activateWindow()
-        #self._copy_dialog_window.destroyed.connect(help)
+
+    #        else:
+    #            self._copy_dialog_window.activateWindow()
+    # self._copy_dialog_window.destroyed.connect(help)
 
     def _configure_path_search_runnable(self) -> PathSearchRunnable:
         runnable = PathSearchRunnable()
@@ -133,7 +142,8 @@ class MainWindow(QMainWindow):
         text = f"Still searching ... So far {number_of_hits} elements found!"
         append_text_in_color(self._search_output, text, color)
 
-    def _on_search_button_clicked(self, search_succeeded: bool, sorted_path_list: OrderedDict, search_statistics: Dict) -> None:
+    def _on_search_button_clicked(self, search_succeeded: bool, sorted_path_list: OrderedDict,
+                                  search_statistics: Dict) -> None:
         """Button Action function"""
         color = 'black'
         if not search_succeeded:
@@ -145,9 +155,20 @@ class MainWindow(QMainWindow):
             self._search_output.clear()
         else:
             self._search_output.clear()
-        #self._search_results = search_results
+        # self._search_results = search_results
+        row = 0
+        self.table.setRowCount(len(sorted_path_list))
         for size_or_hash, path in sorted_path_list.items():
-            append_text_in_color(self._search_output, path, color)
+            # append_text_in_color(self._search_output, path, color)
+            print(f"Path: {str(path)}, size: {size_or_hash}")
+            path_item = QTableWidgetItem(str(path))
+            self.table.setItem(row, 0, path_item)
+
+            size_item = QTableWidgetItem()
+            if hash(path) != size_or_hash:
+                size_item = QTableWidgetItem(format_size(size_or_hash))
+            self.table.setItem(row, 1, size_item)
+            row += 1
 
         if search_succeeded:
             self._file_counter.clear()
