@@ -1,17 +1,18 @@
 import platform
 from typing import Dict
 
-from PyQt5.QtCore import QRegExp, QCoreApplication
+from PyQt5.QtCore import QRegExp, QCoreApplication, Qt
 from PyQt5.QtGui import QRegExpValidator
-from PyQt5.QtWidgets import QMainWindow, QWidget, QFormLayout, QLabel, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QMainWindow, QWidget, QFormLayout, QLabel, QVBoxLayout, QTableWidgetItem
 
-from runnables.path_search_runnable import PathSearchRunnable
-from runnables.thread_manager import ThreadManager
-from ui_elements.main_window import inputs, outputs
-from ui_elements.misc import append_text_in_color
-from ui_elements import copy_dialog_window
+
 from misc.byte_format import format_size
 from misc.dictionary_string_keys import *
+from runnables.path_search_runnable import PathSearchRunnable
+from runnables.thread_manager import ThreadManager
+from ui_elements import copy_dialog_window
+from ui_elements.main_window import inputs, outputs
+
 
 # Subclass QMainWindow to customize your application's main window
 class MainWindow(QMainWindow):
@@ -24,7 +25,6 @@ class MainWindow(QMainWindow):
         self._smallest_file = None
         self._largest_file = None
         self._files_sum = None
-        self._search_output = None
         self._search_button = None
         self._ignore_hidden_files_check_box = None
         self._exit_button = None
@@ -54,9 +54,9 @@ class MainWindow(QMainWindow):
         self._ignore_hidden_files_check_box = inputs.ignore_hidden_files_check_box_setup(self, self.run_search)
         self._show_files_default_search_path_check_box = inputs.show_files_default_search_path_check_box_setup(self,
                                                                                                                self.run_search)
+        self._table = outputs.output_table(self)
         self._search_button = inputs.search_button_setup(self, self.run_search)
         self._copy_dialog_button = inputs.copy_dialog_button(self, self.copy_dialog_window)
-        self._search_output = outputs.search_output_setup(self)
         self._file_counter = outputs.initialize_read_only_qline_edit(self)
         self._largest_file = outputs.initialize_read_only_qline_edit(self)
         self._smallest_file = outputs.initialize_read_only_qline_edit(self)
@@ -68,39 +68,47 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(self._title)
         self.setGeometry(self._left, self._top, self._width, self._height)
         self.create_ui_elements()
-        outer_layout = QFormLayout()
-        outer_layout.addRow(QLabel("Detected operating system: "), QLabel(f"{platform.system()}"))
-        outer_layout.addRow(QLabel("Provide the default search path here."), self._search_path_input)
-        outer_layout.addRow("Show files in default search path", self._show_files_default_search_path_check_box)
-        outer_layout.addRow("Ignore hidden folders", self._ignore_hidden_files_check_box)
-        outer_layout.addRow(self._search_button, self._folder_file_pattern_input)
-        outer_layout.addRow("Number of folders/files found: ", self._file_counter)
-        outer_layout.addRow("Smallest file: ", self._smallest_file)
-        outer_layout.addRow("Largest file: ", self._largest_file)
-        outer_layout.addRow("Total memory of files found: ", self._files_sum)
-        outer_layout.addRow("Folders/files found in given path (max. 5000)", self._search_output)
-        outer_layout.addRow("To copy files please press button", self._copy_dialog_button)
-        outer_layout.addRow("Exit button", self._exit_button)
+        outer_layout = QVBoxLayout()
+        self.setCentralWidget(self._table)
+        upper_form_layout = QFormLayout()
+        upper_form_layout.addRow(QLabel("Detected operating system: "), QLabel(f"{platform.system()}"))
+        upper_form_layout.addRow(QLabel("Provide the default search path here."), self._search_path_input)
+        upper_form_layout.addRow("Show files in default search path", self._show_files_default_search_path_check_box)
+        upper_form_layout.addRow("Ignore hidden folders", self._ignore_hidden_files_check_box)
+        upper_form_layout.addRow(self._search_button, self._folder_file_pattern_input)
+        upper_form_layout.addRow("Number of folders/files found: ", self._file_counter)
+        upper_form_layout.addRow("Smallest file: ", self._smallest_file)
+        upper_form_layout.addRow("Largest file: ", self._largest_file)
+        upper_form_layout.addRow("Total memory of files found: ", self._files_sum)
+        # upper_from_layout.addRow("Folders/files found in given path (max. 5000)", self._search_output)
+
+        lower_form_layout = QFormLayout()
+        lower_form_layout.addRow("To copy files please press button", self._copy_dialog_button)
+        lower_form_layout.addRow("Exit button", self._exit_button)
+        outer_layout.addLayout(upper_form_layout)
+        outer_layout.addWidget(self._table)
+        outer_layout.addLayout(lower_form_layout)
         widget.setLayout(outer_layout)
         self.setCentralWidget(widget)
         self.show()
 
     def configure_copy_dialog_input(self):
-        input ={}
+        input = {}
         input["SearchPathInput"] = self._search_path_input.text()
         input["FolderFilePattern"] = self._folder_file_pattern_input.text()
-        input["StartPathValidator"]  =self._start_path_validator
+        input["StartPathValidator"] = self._start_path_validator
         input["FolderFileValidator"] = self._folder_file_validator
         input["CopyRunnable"] = self.run_copy
         return input
 
     def copy_dialog_window(self):
-#        if self._copy_dialog_window is None or not self._copy_dialog_window.isVisible():
+        #        if self._copy_dialog_window is None or not self._copy_dialog_window.isVisible():
         input = self.configure_copy_dialog_input()
         self._copy_dialog_window = copy_dialog_window.open_copy_dialog_window(input)
-#        else:
-#            self._copy_dialog_window.activateWindow()
-        #self._copy_dialog_window.destroyed.connect(help)
+
+    #        else:
+    #            self._copy_dialog_window.activateWindow()
+    # self._copy_dialog_window.destroyed.connect(help)
 
     def _configure_path_search_runnable(self) -> PathSearchRunnable:
         runnable = PathSearchRunnable()
@@ -122,26 +130,36 @@ class MainWindow(QMainWindow):
         pass
 
     def _on_still_searching(self, number_of_hits):
-        color = 'red'
-        self._search_output.clear()
         text = f"Still searching ... So far {number_of_hits} elements found!"
-        append_text_in_color(self._search_output, text, color)
+        outputs.add_one_signal_item_table(text, self._table)
 
-    def _on_search_button_clicked(self, search_succeeded: bool, sorted_path_list: dict, search_statistics: Dict) -> None:
+
+    def _on_search_button_clicked(self, search_succeeded: bool, sorted_path_list: Dict,
+                                  search_statistics: Dict) -> None:
         """Button Action function"""
-        color = 'black'
         if not search_succeeded:
-            color = 'red'
-            sorted_path_list = dict({0: 'Invalid path!!!'})
+            text = "Invalid path!!!"
+            outputs.add_one_signal_item_table(text, self._table)
+            return
         elif len(sorted_path_list) == 0:
-            color = 'red'
-            sorted_path_list = dict({0: 'No results found!'})
-            self._search_output.clear()
-        else:
-            self._search_output.clear()
-        #self._search_results = search_results
+            text = "No results found!"
+            outputs.add_one_signal_item_table(text, self._table)
+            return
+
+        # self._search_results = search_results
+        row = 0
+        self._table.setRowCount(len(sorted_path_list))
+
         for size_or_hash, path in sorted_path_list.items():
-            append_text_in_color(self._search_output, path, color)
+            # append_text_in_color(self._search_output, path, color)
+            path_item = QTableWidgetItem(str(path))
+            self._table.setItem(row, 0, path_item)
+
+            size_item = QTableWidgetItem()
+            if hash(path) != size_or_hash:
+                size_item = QTableWidgetItem(format_size(size_or_hash))
+            self._table.setItem(row, 1, size_item)
+            row += 1
 
         if search_succeeded:
             self._file_counter.clear()
