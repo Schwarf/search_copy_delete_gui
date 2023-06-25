@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QLineEdit, QPushButton, QCheckBox
+from PyQt5.QtCore import QDir
+from PyQt5.QtWidgets import QLineEdit, QPushButton, QCheckBox, QCompleter, QDirModel
 
 
 def folder_file_pattern_setup(parent, validator) -> QLineEdit:
@@ -8,7 +9,13 @@ def folder_file_pattern_setup(parent, validator) -> QLineEdit:
 
 
 def default_search_path_setup(parent, validator, slot_function) -> QLineEdit:
+    completer = QCompleter()
+    path_model = QDirModel(completer)
+    path_model.setFilter(QDir.AllDirs | QDir.NoDotAndDotDot)
+    completer.setModel(path_model)
+    completer.setCompletionMode(QCompleter.PopupCompletion)
     search_path_input = QLineEdit(parent)
+    search_path_input.setCompleter(completer)
     search_path_input.setValidator(validator)
     search_path_input.textChanged.connect(slot_function)
     return search_path_input
