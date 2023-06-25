@@ -1,10 +1,10 @@
 import platform
-from collections import OrderedDict
 from typing import Dict
 
-from PyQt5.QtCore import QRegExp, QCoreApplication
+from PyQt5.QtCore import QRegExp, QCoreApplication, Qt
 from PyQt5.QtGui import QRegExpValidator
-from PyQt5.QtWidgets import QMainWindow, QWidget, QFormLayout, QLabel, QVBoxLayout, QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QMainWindow, QWidget, QFormLayout, QLabel, QVBoxLayout, QTableWidget, QTableWidgetItem, \
+    QHeaderView
 
 from misc.byte_format import format_size
 from misc.dictionary_string_keys import *
@@ -12,7 +12,6 @@ from runnables.path_search_runnable import PathSearchRunnable
 from runnables.thread_manager import ThreadManager
 from ui_elements import copy_dialog_window
 from ui_elements.main_window import inputs, outputs
-from ui_elements.misc import append_text_in_color
 
 
 # Subclass QMainWindow to customize your application's main window
@@ -26,7 +25,6 @@ class MainWindow(QMainWindow):
         self._smallest_file = None
         self._largest_file = None
         self._files_sum = None
-        self._search_output = None
         self._search_button = None
         self._ignore_hidden_files_check_box = None
         self._exit_button = None
@@ -58,7 +56,6 @@ class MainWindow(QMainWindow):
                                                                                                                self.run_search)
         self._search_button = inputs.search_button_setup(self, self.run_search)
         self._copy_dialog_button = inputs.copy_dialog_button(self, self.copy_dialog_window)
-        self._search_output = outputs.search_output_setup(self)
         self._file_counter = outputs.initialize_read_only_qline_edit(self)
         self._largest_file = outputs.initialize_read_only_qline_edit(self)
         self._smallest_file = outputs.initialize_read_only_qline_edit(self)
@@ -73,6 +70,10 @@ class MainWindow(QMainWindow):
         outer_layout = QVBoxLayout()
         self.table = QTableWidget(self)
         self.table.setColumnCount(2)
+        # self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        # self.table.setColumnWidth(0, 1500)
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.table.setHorizontalHeaderLabels(["Path", "Size"])
 
         self.setCentralWidget(self.table)
@@ -138,26 +139,39 @@ class MainWindow(QMainWindow):
 
     def _on_still_searching(self, number_of_hits):
         color = 'red'
-        self._search_output.clear()
+        self.table.setRowCount(1)
         text = f"Still searching ... So far {number_of_hits} elements found!"
-        append_text_in_color(self._search_output, text, color)
+        item = QTableWidgetItem(text)
+        item.setForeground(Qt.red)
+        self.table.setItem(0, 0, item)
 
-    def _on_search_button_clicked(self, search_succeeded: bool, sorted_path_list: OrderedDict,
+    def _on_search_button_clicked(self, search_succeeded: bool, sorted_path_list: Dict,
                                   search_statistics: Dict) -> None:
         """Button Action function"""
-        color = 'black'
         if not search_succeeded:
-            color = 'red'
-            sorted_path_list = OrderedDict({0: 'Invalid path!!!'})
+            text = "Invalid path!!!"
+            self.table.setRowCount(0)
+            self.table.insertRow(0)
+            item = QTableWidgetItem(text)
+            item.setForeground(Qt.red)
+            self.table.setItem(0,0, item)
+            return
         elif len(sorted_path_list) == 0:
-            color = 'red'
-            sorted_path_list = OrderedDict({0: 'No results found!'})
-            self._search_output.clear()
-        else:
-            self._search_output.clear()
+            text = "No results found!"
+            self.table.setRowCount(0)
+            self.table.insertRow(0)
+            item = QTableWidgetItem(text)
+            item.setForeground(Qt.red)
+            self.table.setItem(0, 0, item)
+            return
+
         # self._search_results = search_results
         row = 0
         self.table.setRowCount(len(sorted_path_list))
+        self.table.verticalHeader().hide()
+        self.table.setShowGrid(False)
+        self.table.verticalHeader().setDefaultSectionSize(20)
+
         for size_or_hash, path in sorted_path_list.items():
             # append_text_in_color(self._search_output, path, color)
             print(f"Path: {str(path)}, size: {size_or_hash}")
