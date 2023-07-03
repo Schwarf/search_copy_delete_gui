@@ -15,12 +15,12 @@ class CopyRunnable(RunnableInterface):
     def __init__(self) -> None:
         super().__init__()
         self._thread_counter: ThreadCounter = None
-        self._ignore_hidden_files: bool = None
-        self._path = pathlib.Path.home()
-        self._folder_file_pattern: str = None
-        self._show_files_in_path: bool = False
-        self.copy_helper = CopySignalHelper()
-        self._maximum_items = 5000
-        self._is_running = True
+        self._destination_path = None
+        self._origin_folder = None
 
+    def set_destination_path(self, destination_path: str) -> None:
+        self._destination_path = pathlib.Path(destination_path)
+
+    def set_origin_folder(self, origin_folder: str) -> None:
+        self._origin_folder = pathlib.Path(origin_folder)
 
