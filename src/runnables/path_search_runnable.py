@@ -1,12 +1,13 @@
 import pathlib
-from typing import List, Generator, Callable, Optional, Dict
+from typing import Generator, Callable, Optional, Dict
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
+from misc.dictionary_string_keys import *
 from misc.statistics_of_files import StatisticsOfFiles
 from runnables.runnable_interface import RunnableInterface
 from runnables.thread_counter import ThreadCounter
-from misc.dictionary_string_keys import *
+
 
 class SearchSignalHelper(QObject):
     search_result_ready = pyqtSignal(bool, dict, dict)

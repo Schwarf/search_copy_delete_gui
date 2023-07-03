@@ -1,10 +1,9 @@
 import platform
 from typing import Dict
 
-from PyQt5.QtCore import QRegExp, QCoreApplication, Qt
+from PyQt5.QtCore import QRegExp, QCoreApplication
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import QMainWindow, QWidget, QFormLayout, QLabel, QVBoxLayout, QTableWidgetItem
-
 
 from misc.byte_format import format_size
 from misc.dictionary_string_keys import *
@@ -52,8 +51,9 @@ class MainWindow(QMainWindow):
         self._folder_file_pattern_input = inputs.folder_file_pattern_setup(self, self._folder_file_validator)
         self._exit_button = inputs.exit_button_setup(self, QCoreApplication.instance().quit)
         self._ignore_hidden_files_check_box = inputs.ignore_hidden_files_check_box_setup(self, self.run_search)
-        self._show_files_default_search_path_check_box = inputs.show_files_default_search_path_check_box_setup(self,
-                                                                                                               self.run_search)
+        self._show_files_default_search_path_check_box = \
+            inputs.show_files_default_search_path_check_box_setup(self, self.run_search)
+
         self._table = outputs.output_table(self)
         self._search_button = inputs.search_button_setup(self, self.run_search)
         self._copy_dialog_button = inputs.copy_dialog_button(self, self.copy_dialog_window)
@@ -132,7 +132,6 @@ class MainWindow(QMainWindow):
     def _on_still_searching(self, number_of_hits):
         text = f"Still searching ... So far {number_of_hits} elements found!"
         outputs.add_one_signal_item_table(text, self._table)
-
 
     def _on_search_button_clicked(self, search_succeeded: bool, sorted_path_list: Dict,
                                   search_statistics: Dict) -> None:

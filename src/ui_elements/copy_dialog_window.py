@@ -1,7 +1,7 @@
 from typing import Dict, Any
 
-from PyQt5.QtCore import pyqtSlot, QRegExp
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QWidget, QFormLayout, QLineEdit, QPushButton
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtWidgets import QWidget, QFormLayout, QLineEdit, QPushButton
 
 
 @pyqtSlot()

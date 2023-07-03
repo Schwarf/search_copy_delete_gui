@@ -1,5 +1,4 @@
 import pathlib
-from typing import List, Generator, Callable, Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
